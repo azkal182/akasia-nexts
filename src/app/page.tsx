@@ -65,7 +65,7 @@ export default async function Home() {
                       </DialogTrigger>
                       <DialogContent>
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_URL}/${item.notaPath}`}
+                          src={item.notaPath}
                           alt="Nota"
                           width={500}
                           height={500}

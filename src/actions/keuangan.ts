@@ -1,8 +1,9 @@
 "use server"
 import prisma from "@/lib/prisma"
-import fs from 'fs';
+import { supabase } from "@/lib/supabase";
+// import fs from 'fs';
 import { revalidatePath } from "next/cache";
-import path from 'path';
+// import path from 'path';
 
 interface Income {
     no: number;
@@ -66,25 +67,42 @@ interface ItemInput {
     armada?: string
 }
 
-// Fungsi untuk meng-handle upload file dan mendapatkan pathnya
+// Fungsi untuk meng-upload file ke Supabase Storage
 const uploadNota = async (file: File): Promise<string> => {
     try {
-        // Menyusun path penyimpanan file di server lokal
-        const filePath = path.join('./public/uploads', `nota-${Date.now()}${path.extname(file.name)}`);
+        // Nama unik untuk file yang di-upload
+        const fileName = `nota-${Date.now()}${file.name.substring(file.name.lastIndexOf("."))}`;
 
         // Mengonversi file menjadi buffer
         const arrayBuffer = await file.arrayBuffer();
         const buffer = new Uint8Array(arrayBuffer);
 
-        // Menyimpan file ke server lokal menggunakan fs
-        await fs.promises.writeFile(filePath, buffer);
+        // Mengunggah file ke Supabase Storage
+        const { data, error } = await supabase.storage
+            .from("akasia") // Ganti dengan nama bucket Supabase kamu
+            .upload(`${fileName}`, buffer, {
+                contentType: file.type,
+            });
 
-        console.log('File berhasil di-upload ke server di path:', filePath);
+        if (error) {
+            console.error("Error meng-upload file:", error);
+            throw new Error("Gagal meng-upload file ke Supabase");
+        }
 
-        return filePath.replace("public/", "")
+        console.log("File berhasil di-upload ke Supabase:", data.path);
+
+        // Mendapatkan URL file yang diunggah
+        const { data: urlData } = supabase.storage
+            .from("akasia")
+            .getPublicUrl(data.path);
+
+        console.log("public path :", urlData.publicUrl);
+
+
+        return urlData.publicUrl;
     } catch (error) {
-        console.error('Error meng-upload file:', error);
-        throw new Error('Gagal meng-upload file');
+        console.error("Error meng-upload file:", error);
+        throw new Error("Gagal meng-upload file");
     }
 };
 
