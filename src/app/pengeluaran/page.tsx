@@ -89,7 +89,8 @@ const PengeluaranPage = () => {
     setInvoices((prevInvoices) => [...prevInvoices, newInvoice]);
     setNewDescription("");
     setNewArmada("");
-    setNewQuantity(0);
+    setNewArmadaName("");
+    setNewQuantity(1);
     setNewTotal(0);
     // setNewNota(null); // Reset file nota setelah menambahkannya
   };

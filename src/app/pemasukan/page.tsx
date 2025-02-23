@@ -112,6 +112,7 @@ const PemasukanPage = () => {
             <Label>Total</Label>
             <Input
               type="text"
+              inputMode="numeric"
               value={
                 isTotalFocused
                   ? newTotal === 0
