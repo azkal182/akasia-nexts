@@ -32,6 +32,7 @@ const PemasukanPage = () => {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     new Date()
   );
+  const [pending, setPending] = useState(false);
 
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -74,18 +75,24 @@ const PemasukanPage = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      // console.log(incomes);
+    setPending(true);
+    toast.promise(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      await inputPemasukan(selectedDate, incomes);
-
-      toast("Event has been created.", { position: "top-right" });
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      toast("Event has failed created.", { position: "top-right" });
-    }
+      inputPemasukan(selectedDate, incomes),
+      {
+        position: "top-right",
+        loading: "Menyimpan...",
+        success: (data) => {
+          setPending(false);
+          return data?.message;
+        },
+        error: () => {
+          setPending(false);
+          return "Gagal mencatat pemasukan";
+        },
+      }
+    );
   };
   return (
     <div className="p-8">
@@ -126,7 +133,11 @@ const PemasukanPage = () => {
               placeholder="Masukkan total"
             />
           </div>
-          <Button className="mt-auto w-full md:w-32" onClick={handleAddIncome}>
+          <Button
+            disabled={newDescription === "" || newTotal === 0}
+            className="mt-auto w-full md:w-32"
+            onClick={handleAddIncome}
+          >
             Tambah
           </Button>
         </div>
@@ -180,7 +191,12 @@ const PemasukanPage = () => {
             </TableFooter>
           </Table>
           <div className="flex justify-end mt-4">
-            <Button onClick={handleSubmit}>Simpan</Button>
+            <Button
+              disabled={pending || incomes.length === 0}
+              onClick={handleSubmit}
+            >
+              {pending ? "Menyimpan..." : "Simpan"}
+            </Button>
           </div>
         </div>
       </Card>

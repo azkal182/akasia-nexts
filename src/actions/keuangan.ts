@@ -52,6 +52,7 @@ export const inputPemasukan = async (date: Date, incomes: Income[]) => {
         revalidatePath("/")
 
         console.log('Pemasukan berhasil dicatat.');
+        return { message: 'Pemasukan berhasil dicatat.' }
     } catch (error) {
         console.error('Gagal mencatat pemasukan:', error);
     }

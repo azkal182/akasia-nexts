@@ -1,0 +1,23 @@
+CREATE OR REPLACE FUNCTION update_balance()
+RETURNS TRIGGER AS $$
+DECLARE
+    new_balance INTEGER;
+BEGIN
+    -- Ambil saldo terakhir sebelum transaksi ini
+    SELECT COALESCE(balance, 0) INTO new_balance FROM "Transaction"
+    WHERE date < NEW.date
+    ORDER BY date DESC
+    LIMIT 1;
+
+    -- Update saldo transaksi baru
+    NEW.balance := new_balance + NEW.credit - NEW.debit;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+// kemudian
+CREATE TRIGGER balance_trigger
+BEFORE INSERT ON "Transaction"
+FOR EACH ROW
+EXECUTE FUNCTION update_balance();

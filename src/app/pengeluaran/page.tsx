@@ -52,6 +52,7 @@ const PengeluaranPage = () => {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     new Date()
   );
+  const [pending, setPending] = useState(false);
   const [newNota, setNewNota] = useState<File | null>(null);
   const [newArmadaName, setNewArmadaName] = useState<string>("");
 
@@ -113,28 +114,39 @@ const PengeluaranPage = () => {
   };
 
   const handleSubmit = async () => {
-    console.log(invoices);
-    console.log(newNota);
+    if (pending) return; // Mencegah double submit
+    setPending(true);
+
     if (newDescription !== "" || newArmada !== "" || newTotal !== 0) {
-      toast("tombol tambah belum ditekan atau hapus isian", {
+      toast("Tombol tambah belum ditekan atau hapus isian", {
         position: "top-right",
       });
-    } else if (newNota === null) {
-      toast("nota belum ada", { position: "top-right" });
-    } else {
-      try {
-        const upload = await inputPengeluaran(
-          selectedDate as Date,
-          newDescription,
-          invoices,
-          newNota
-        );
-        toast(upload?.message, { position: "top-right" });
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        toast("gagal");
-      }
+      setPending(false); // Kembalikan false jika gagal
+      return;
     }
+
+    if (newNota === null) {
+      toast("Nota belum ada", { position: "top-right" });
+      setPending(false); // Kembalikan false jika gagal
+      return;
+    }
+
+    toast.promise(
+      inputPengeluaran(selectedDate as Date, newDescription, invoices, newNota),
+      {
+        position: "top-right",
+        loading: "Menyimpan...",
+        success: (data) => {
+          setPending(false);
+          setInvoices([]);
+          return data?.message;
+        },
+        error: () => {
+          setPending(false);
+          return "Gagal mencatat pengeluaran";
+        },
+      }
+    );
   };
 
   return (
@@ -212,7 +224,12 @@ const PengeluaranPage = () => {
             {newNota && <p className="mt-2 text-sm">{newNota.name}</p>}
           </div>
 
-          <Button className="mt-auto" onClick={handleAddInvoice}>
+          <Button
+            disabled={newDescription === "" || newTotal === 0}
+            type="submit"
+            className="mt-auto"
+            onClick={handleAddInvoice}
+          >
             Tambah
           </Button>
         </div>
@@ -273,7 +290,13 @@ const PengeluaranPage = () => {
             </TableFooter>
           </Table>
           <div className="flex justify-end mt-4">
-            <Button onClick={handleSubmit}>Simpan</Button>
+            <Button
+              type="submit"
+              disabled={pending || invoices.length === 0}
+              onClick={handleSubmit}
+            >
+              {pending ? "Menyimpan..." : "Simpan"}
+            </Button>
           </div>
         </div>
       </Card>

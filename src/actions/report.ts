@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 
 export const getReportData = async () => {
     const transactionsWithItems = await prisma.transaction.findMany({
+        orderBy: { date: 'asc' },
         include: {
             expense: {
                 include: {
@@ -24,29 +25,40 @@ export const getReportData = async () => {
         },
     });
 
+
+    let runningBalance = 0; // Untuk menyimpan saldo yang diperbarui
     // Format data agar setiap item memiliki informasi transaksi
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const formattedData = transactionsWithItems.flatMap((transaction) => {
-        if (transaction.expense && transaction.expense.items.length > 0) {
-            return transaction.expense.items.map((item) => ({
-                transactionId: transaction.id,
-                date: transaction.date,
-                transactionDescription: transaction.description,
-                type: "expense",
-                debit: transaction.debit,
-                credit: transaction.credit,
-                balance: transaction.balance,
-                itemId: item.id,
-                itemDescription: item.description,
-                quantity: item.quantity,
-                total: item.total,
-                notaPath: transaction.expense?.notaFilePath,
-                armada: item.armada ?? null, // Armada bisa null
-            }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const formattedData = transactionsWithItems.flatMap((transaction: any) => {
+        if (runningBalance === 0) {
+            runningBalance = transaction.balance; // Set balance awal dari transaksi pertama
         }
 
-        // Pastikan transaksi yang bukan `expense` tetap dikembalikan sebagai `income`
+        if (transaction.expense && transaction.expense.items.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return transaction.expense.items.map((item: any) => {
+                runningBalance -= item.total; // Kurangi balance setiap kali item diproses
+
+                return {
+                    transactionId: transaction.id,
+                    date: transaction.date,
+                    transactionDescription: transaction.description,
+                    type: "expense",
+                    debit: item.total,
+                    credit: null,
+                    balance: runningBalance, // Balance diperbarui setelah setiap item
+                    itemId: item.id,
+                    itemDescription: item.description,
+                    quantity: item.quantity,
+                    total: item.total,
+                    totalNota: transaction.debit,
+                    notaPath: transaction.expense?.notaFilePath,
+                    armada: item.armada ?? null,
+                };
+            });
+        }
+        runningBalance = transaction.balance
+        // Jika transaksi adalah income, tambahkan tanpa mengubah balance
         return [{
             transactionId: transaction.id,
             date: transaction.date,
@@ -54,14 +66,15 @@ export const getReportData = async () => {
             type: "income",
             debit: transaction.debit,
             credit: transaction.credit,
-            balance: transaction.balance,
+            balance: runningBalance, // Gunakan balance yang sudah diperbarui sebelumnya
             itemId: null,
             itemDescription: null,
             quantity: null,
-            total: transaction.income?.amount ?? 0, // Gunakan optional chaining dan default value
+            total: transaction.income?.amount ?? 0,
             armada: null,
         }];
     });
+
 
 
     console.log(JSON.stringify(transactionsWithItems, null, 2));

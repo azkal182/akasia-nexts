@@ -35,7 +35,7 @@ export default function RootLayout({
           </div>
         </nav>
         {children}
-        <Toaster />
+        <Toaster richColors />
       </body>
     </html>
   );

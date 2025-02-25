@@ -53,3 +53,49 @@ model Transaction {
     income      Income?
     expense     Expense?
 }
+
+model Car {
+    id           String        @id @default(uuid()) // ID unik
+    name         String // Nama mobil (misal: Innova, Avanza)
+    licensePlate String        @unique // Nomor plat mobil
+    status       CarStatus     @default(AVAILABLE) // Status mobil (tersedia, digunakan)
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    usageRecords UsageRecord[]
+}
+
+model Driver {
+    id           String        @id @default(uuid())
+    name         String // Nama driver
+    phone        String        @unique // Nomor telepon driver
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    usageRecords UsageRecord[]
+}
+
+model UsageRecord {
+    id          String      @id @default(uuid())
+    carId       String
+    driverId    String
+    purpose     String
+    destination String
+    startTime   DateTime    @default(now())
+    endTime     DateTime?
+    status      UsageStatus @default(ONGOING)
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    car    Car    @relation(fields: [carId], references: [id])
+    driver Driver @relation(fields: [driverId], references: [id])
+}
+
+enum CarStatus {
+    AVAILABLE
+    IN_USE
+}
+
+// ENUM untuk status pemakaian
+enum UsageStatus {
+    ONGOING
+    COMPLETED
+}
