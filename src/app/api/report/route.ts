@@ -113,6 +113,7 @@ async function fetchImageAsBase64(url: string) {
 }
 
 
+export const maxDuration = 60;
 export async function GET() {
     const transactions = await getReportData()
     console.log(JSON.stringify(transactions, null, 2));
