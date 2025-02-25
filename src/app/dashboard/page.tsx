@@ -1,114 +1,198 @@
-// import { auth } from '@/lib/auth';
-// import { redirect } from 'next/navigation';
+"use client";
 
-// export default async function Dashboard() {
-//   const session = await auth();
-
-//   if (!session?.user) {
-//     return redirect('/');
-//   } else {
-//     redirect('/dashboard/overview');
-//   }
-// }
-
-import { getReportData } from "@/actions/report";
-import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
 } from "@/components/ui/table";
-import { toRupiah } from "@/lib/rupiah";
+
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { Suspense } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogTrigger,
   DialogContent,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import Image from "next/image";
+import PageContainer from "@/components/layout/page-container";
 import ExportButton from "./export-button";
+import { getReportData } from "@/actions/report";
+import { toRupiah } from "@/lib/rupiah";
+import { DataTableSkeleton } from "@/components/ui/table/data-table-skeleton";
+import MonthYearSelect from "@/components/month-year-select";
+import { toZonedTime } from "date-fns-tz";
+export default function Home() {
+  const searchParams = useSearchParams();
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const currentDate = new Date();
 
-export default async function Home() {
-  const data = await getReportData();
-  console.log(JSON.stringify(data, null, 2));
+  // Default startDate dan endDate (awal dan akhir bulan ini)
+  const defaultStartDate = toZonedTime(
+    new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+    timeZone
+  );
+  console.log({ defaultStartDate });
+
+  const defaultEndDate = toZonedTime(
+    new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0),
+    timeZone
+  );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState<Date>(defaultStartDate);
+  const [endDate, setEndDate] = useState<Date>(defaultEndDate);
+
+  useEffect(() => {
+    const startDateRaw = searchParams.get("startDate");
+    const endDateRaw = searchParams.get("endDate");
+
+    const newStartDate = startDateRaw
+      ? toZonedTime(new Date(startDateRaw), timeZone)
+      : defaultStartDate;
+    const newEndDate = endDateRaw
+      ? toZonedTime(new Date(endDateRaw), timeZone)
+      : defaultEndDate;
+
+    if (!isNaN(newStartDate.getTime())) setStartDate(newStartDate);
+    if (!isNaN(newEndDate.getTime())) setEndDate(newEndDate);
+  }, [searchParams, timeZone]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const reportData = await getReportData({
+          startDate,
+          endDate,
+          timeZone,
+        });
+        setData(reportData);
+      } catch (error) {
+        console.error("Failed to fetch report data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [startDate, endDate]);
 
   return (
-    <div className="p-4">
-      <Card className="p-8">
-        <ExportButton />
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>No</TableHead>
-              <TableHead>Tanggal</TableHead>
-              <TableHead>Keterangan</TableHead>
-              <TableHead>Armada</TableHead>
-              <TableHead>Pemasukan</TableHead>
-              <TableHead>Pengeluaran</TableHead>
-              <TableHead>Saldo</TableHead>
-              <TableHead>Nota</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {data?.map((item: any, index) => (
-              <TableRow
-                key={index}
-                className={
-                  item.credit
-                    ? "bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900"
-                    : ""
-                }
-              >
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>
-                  {format(item.date, "PPP", { locale: id })}
-                </TableCell>
-                <TableCell>
-                  {item.transactionDescription
-                    ? item.transactionDescription
-                    : item.itemDescription}
-                </TableCell>
-                <TableCell>{item.armada}</TableCell>
-                <TableCell>
-                  {item.credit ? toRupiah(item.credit) : "-"}
-                </TableCell>
-                <TableCell>{item.debit ? toRupiah(item.debit) : "-"}</TableCell>
-                <TableCell>{toRupiah(item.balance)}</TableCell>
-                <TableCell>
-                  {item.notaPath ? (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="sm">Lihat</Button>
-                      </DialogTrigger>
-                      <DialogContent className="p-6 max-w-lg max-h-[90vh] overflow-y-auto">
-                        <DialogTitle>Nota</DialogTitle>
-                        <div className="flex items-center justify-center">
-                          <Image
-                            src={item.notaPath}
-                            alt="Nota"
-                            width={350}
-                            height={350}
-                            className="rounded-lg"
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+    <PageContainer>
+      <div className="flex flex-1 flex-col space-y-4">
+        <Card className="p-8 max-w-full min-h-60">
+          <div className="flex items-start justify-between">
+            <ExportButton
+              disable={data.length === 0}
+              date={{
+                startDate: startDate,
+                endDate: endDate,
+                timeZone: timeZone,
+              }}
+            />
+            <MonthYearSelect
+              searchParams={{
+                startDate: format(startDate, "yyyy-MM-dd"),
+                endDate: format(endDate, "yyyy-MM-dd"),
+              }}
+            />
+          </div>
+          {loading ? (
+            <div className="min-h-60 flex mt-4">
+              <DataTableSkeleton columnCount={8} rowCount={5} />
+            </div>
+          ) : (
+            <div className="overflow-x-auto mt-4">
+              <Table className="min-w-[1000px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>No</TableHead>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Keterangan</TableHead>
+                    <TableHead>Armada</TableHead>
+                    <TableHead>Pemasukan</TableHead>
+                    <TableHead>Pengeluaran</TableHead>
+                    <TableHead>Saldo</TableHead>
+                    <TableHead>Nota</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.length > 0 ? (
+                    data?.map((item, index: number) => (
+                      <TableRow
+                        key={index}
+                        className={
+                          item.credit
+                            ? "bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900"
+                            : ""
+                        }
+                      >
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>
+                          {format(item.date, "PPP", { locale: id })}
+                        </TableCell>
+                        <TableCell>
+                          {item.transactionDescription
+                            ? item.transactionDescription
+                            : item.itemDescription}
+                        </TableCell>
+                        <TableCell>{item.armada}</TableCell>
+                        <TableCell>
+                          {item.credit ? toRupiah(item.credit) : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {item.debit ? toRupiah(item.debit) : "-"}
+                        </TableCell>
+                        <TableCell>{toRupiah(item.balance)}</TableCell>
+                        <TableCell>
+                          {item.notaPath ? (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="sm">Lihat</Button>
+                              </DialogTrigger>
+                              <DialogContent className="p-6 max-w-lg max-h-[90vh] overflow-y-auto">
+                                <DialogTitle>Nota</DialogTitle>
+                                <div className="flex items-center justify-center">
+                                  <Image
+                                    src={item.notaPath}
+                                    alt="Nota"
+                                    width={350}
+                                    height={350}
+                                    className="rounded-lg"
+                                  />
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
                   ) : (
-                    "-"
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center">
+                        Tidak ada Data
+                      </TableCell>
+                    </TableRow>
                   )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-    </div>
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </Card>
+      </div>
+    </PageContainer>
   );
 }

@@ -8,7 +8,13 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import { id } from "date-fns/locale";
 pdfMake.vfs = pdfFonts.vfs;
 
-const ExportButton = () => {
+const ExportButton = ({
+  disable = false,
+  date,
+}: {
+  disable: boolean;
+  date: { startDate: Date; endDate: Date; timeZone: string };
+}) => {
   const [loading, setLoading] = useState(false);
   async function fetchImageAsBase64(url: string) {
     try {
@@ -30,7 +36,11 @@ const ExportButton = () => {
 
   const generatePdf = async () => {
     setLoading(true);
-    const transactions = await getReportData();
+    const transactions = await getReportData({
+      startDate: date.startDate,
+      endDate: date.endDate,
+      timeZone: date.timeZone,
+    });
 
     // Hapus duplikasi berdasarkan transactionId
     const uniqueTransactions = Object.values(
@@ -194,7 +204,7 @@ const ExportButton = () => {
   };
 
   return (
-    <Button onClick={generatePdf} disabled={loading}>
+    <Button onClick={generatePdf} disabled={loading || disable}>
       {loading ? "Membuat PDF..." : "Unduh PDF"}
     </Button>
   );

@@ -1,8 +1,17 @@
 "use server"
 import prisma from "@/lib/prisma";
+import { fromZonedTime } from "date-fns-tz";
 
-export const getReportData = async () => {
+export const getReportData = async ({ startDate, endDate, timeZone }: { startDate: Date, endDate: Date, timeZone: string }) => {
+    console.log(startDate, endDate);
+
     const transactionsWithItems = await prisma.transaction.findMany({
+        where: {
+            date: {
+                gte: fromZonedTime(startDate, timeZone),
+                lte: fromZonedTime(endDate, timeZone)
+            }
+        },
         orderBy: { date: 'asc' },
         include: {
             expense: {
@@ -78,7 +87,7 @@ export const getReportData = async () => {
 
 
 
-    console.log(JSON.stringify(transactionsWithItems, null, 2));
+    // console.log(JSON.stringify(transactionsWithItems, null, 2));
 
 
     return formattedData
