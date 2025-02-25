@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
+import ExportButton from "./export-button";
 
 export default async function Home() {
   const data = await getReportData();
@@ -22,6 +23,7 @@ export default async function Home() {
   return (
     <div className="p-4">
       <Card className="p-8">
+        <ExportButton />
         <Table>
           <TableHeader>
             <TableRow>

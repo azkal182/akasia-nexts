@@ -1,6 +1,7 @@
 "use server"
 import prisma from "@/lib/prisma"
 import { supabase } from "@/lib/supabase";
+import sharp from "sharp";
 // import fs from 'fs';
 import { revalidatePath } from "next/cache";
 // import path from 'path';
@@ -69,20 +70,61 @@ interface ItemInput {
 }
 
 // Fungsi untuk meng-upload file ke Supabase Storage
+// const uploadNota = async (file: File): Promise<string> => {
+//     try {
+//         // Nama unik untuk file yang di-upload
+//         const fileName = `nota-${Date.now()}${file.name.substring(file.name.lastIndexOf("."))}`;
+
+//         // Mengonversi file menjadi buffer
+//         const arrayBuffer = await file.arrayBuffer();
+//         const buffer = new Uint8Array(arrayBuffer);
+
+//         // Mengunggah file ke Supabase Storage
+//         const { data, error } = await supabase.storage
+//             .from("akasia") // Ganti dengan nama bucket Supabase kamu
+//             .upload(`${fileName}`, buffer, {
+//                 contentType: file.type,
+//             });
+
+//         if (error) {
+//             console.error("Error meng-upload file:", error);
+//             throw new Error("Gagal meng-upload file ke Supabase");
+//         }
+
+//         console.log("File berhasil di-upload ke Supabase:", data.path);
+
+//         // Mendapatkan URL file yang diunggah
+//         const { data: urlData } = supabase.storage
+//             .from("akasia")
+//             .getPublicUrl(data.path);
+
+//         console.log("public path :", urlData.publicUrl);
+
+
+//         return urlData.publicUrl;
+//     } catch (error) {
+//         console.error("Error meng-upload file:", error);
+//         throw new Error("Gagal meng-upload file");
+//     }
+// };
 const uploadNota = async (file: File): Promise<string> => {
     try {
         // Nama unik untuk file yang di-upload
-        const fileName = `nota-${Date.now()}${file.name.substring(file.name.lastIndexOf("."))}`;
+        const fileName = `nota-${Date.now()}.jpg`;
 
-        // Mengonversi file menjadi buffer
+        // Kompresi gambar menggunakan Sharp langsung ke buffer
         const arrayBuffer = await file.arrayBuffer();
         const buffer = new Uint8Array(arrayBuffer);
+        const compressedBuffer = await sharp(buffer)
+            .resize({ width: 1024 }) // Resize jika lebih besar dari 1024px
+            .jpeg({ quality: 70 }) // Kompres dengan kualitas 70%
+            .toBuffer(); // Konversi langsung ke buffer
 
-        // Mengunggah file ke Supabase Storage
+        // Upload langsung ke Supabase Storage
         const { data, error } = await supabase.storage
-            .from("akasia") // Ganti dengan nama bucket Supabase kamu
-            .upload(`${fileName}`, buffer, {
-                contentType: file.type,
+            .from("akasia")
+            .upload(fileName, compressedBuffer, {
+                contentType: "image/jpeg",
             });
 
         if (error) {
@@ -90,17 +132,11 @@ const uploadNota = async (file: File): Promise<string> => {
             throw new Error("Gagal meng-upload file ke Supabase");
         }
 
-        console.log("File berhasil di-upload ke Supabase:", data.path);
-
         // Mendapatkan URL file yang diunggah
-        const { data: urlData } = supabase.storage
-            .from("akasia")
-            .getPublicUrl(data.path);
+        const publicUrl = supabase.storage.from("akasia").getPublicUrl(data.path).data.publicUrl;
+        console.log("Public URL:", publicUrl);
 
-        console.log("public path :", urlData.publicUrl);
-
-
-        return urlData.publicUrl;
+        return publicUrl;
     } catch (error) {
         console.error("Error meng-upload file:", error);
         throw new Error("Gagal meng-upload file");
