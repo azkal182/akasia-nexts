@@ -30,7 +30,11 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { navItems, navItemsTransaction } from "@/constants/data";
+import {
+  navItems,
+  navItemsDriver,
+  navItemsTransaction,
+} from "@/constants/data";
 import {
   BadgeCheck,
   Bell,
@@ -56,6 +60,7 @@ export default function AppSidebar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const { state, isMobile } = useSidebar();
+  const { setOpenMobile } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
@@ -102,7 +107,10 @@ export default function AppSidebar() {
                               asChild
                               isActive={pathname === subItem.url}
                             >
-                              <Link href={subItem.url}>
+                              <Link
+                                href={subItem.url}
+                                onClick={() => setOpenMobile(false)}
+                              >
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -119,7 +127,7 @@ export default function AppSidebar() {
                     tooltip={item.title}
                     isActive={pathname === item.url}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={() => setOpenMobile(false)}>
                       <Icon />
                       <span>{item.title}</span>
                     </Link>
@@ -160,7 +168,10 @@ export default function AppSidebar() {
                               asChild
                               isActive={pathname === subItem.url}
                             >
-                              <Link href={subItem.url}>
+                              <Link
+                                href={subItem.url}
+                                onClick={() => setOpenMobile(false)}
+                              >
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -177,7 +188,68 @@ export default function AppSidebar() {
                     tooltip={item.title}
                     isActive={pathname === item.url}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={() => setOpenMobile(false)}>
+                      <Icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Driver</SidebarGroupLabel>
+          <SidebarMenu>
+            {navItemsDriver.map((item) => {
+              const Icon = item.icon ? Icons[item.icon] : Icons.logo;
+              return item?.items && item?.items?.length > 0 ? (
+                <Collapsible
+                  key={item.title}
+                  asChild
+                  defaultOpen={item.isActive}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={item.title}
+                        isActive={pathname === item.url}
+                      >
+                        {item.icon && <Icon />}
+                        <span>{item.title}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {item.items?.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={pathname === subItem.url}
+                            >
+                              <Link
+                                href={subItem.url}
+                                onClick={() => setOpenMobile(false)}
+                              >
+                                <span>{subItem.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ) : (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={pathname === item.url}
+                  >
+                    <Link href={item.url} onClick={() => setOpenMobile(false)}>
                       <Icon />
                       <span>{item.title}</span>
                     </Link>

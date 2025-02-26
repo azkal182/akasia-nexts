@@ -35,11 +35,15 @@ import {
   X,
   HandCoins,
   Banknote,
+  Car,
+  History,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
 
 export const Icons = {
+  history: History,
+  Car: Car,
   HandCoins: HandCoins,
   Banknote: Banknote,
   upload: Upload,

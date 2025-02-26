@@ -42,6 +42,25 @@ export const navItemsTransaction: NavItem[] = [
         items: []
     }
 ];
+
+export const navItemsDriver: NavItem[] = [
+    {
+        title: 'Armada',
+        url: '/dashboard/cars',
+        icon: 'Car',
+        isActive: false,
+        shortcut: ['c', 'c'],
+        items: []
+    },
+    {
+        title: 'Riwayat',
+        url: '/dashboard/history',
+        icon: 'history',
+        isActive: false,
+        shortcut: ['h', 'h'],
+        items: []
+    }
+];
 export interface SaleUser {
     id: number;
     name: string;

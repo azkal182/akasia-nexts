@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -11,10 +11,8 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { Suspense } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +28,7 @@ import { toRupiah } from "@/lib/rupiah";
 import { DataTableSkeleton } from "@/components/ui/table/data-table-skeleton";
 import MonthYearSelect from "@/components/month-year-select";
 import { toZonedTime } from "date-fns-tz";
+
 export default function Home() {
   const searchParams = useSearchParams();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -40,8 +39,6 @@ export default function Home() {
     new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
     timeZone
   );
-  console.log({ defaultStartDate });
-
   const defaultEndDate = toZonedTime(
     new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0),
     timeZone
@@ -52,29 +49,35 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState<Date>(defaultStartDate);
   const [endDate, setEndDate] = useState<Date>(defaultEndDate);
-
-  useEffect(() => {
-    const startDateRaw = searchParams.get("startDate");
-    const endDateRaw = searchParams.get("endDate");
-
-    const newStartDate = startDateRaw
-      ? toZonedTime(new Date(startDateRaw), timeZone)
-      : defaultStartDate;
-    const newEndDate = endDateRaw
-      ? toZonedTime(new Date(endDateRaw), timeZone)
-      : defaultEndDate;
-
-    if (!isNaN(newStartDate.getTime())) setStartDate(newStartDate);
-    if (!isNaN(newEndDate.getTime())) setEndDate(newEndDate);
-  }, [searchParams, timeZone]);
+  const isFirstRender = useRef(true); // Gunakan useRef untuk melacak render awal
 
   useEffect(() => {
     const fetchData = async () => {
+      const startDateRaw = searchParams.get("startDate");
+      const endDateRaw = searchParams.get("endDate");
+
+      const newStartDate = startDateRaw
+        ? toZonedTime(new Date(startDateRaw), timeZone)
+        : defaultStartDate;
+      const newEndDate = endDateRaw
+        ? toZonedTime(new Date(endDateRaw), timeZone)
+        : defaultEndDate;
+
+      // Perbarui state hanya jika tanggal berbeda
+      if (
+        newStartDate.getTime() !== startDate.getTime() ||
+        newEndDate.getTime() !== endDate.getTime()
+      ) {
+        if (!isNaN(newStartDate.getTime())) setStartDate(newStartDate);
+        if (!isNaN(newEndDate.getTime())) setEndDate(newEndDate);
+      }
+
+      // Fetch data dengan tanggal yang sudah diperbarui
       setLoading(true);
       try {
         const reportData = await getReportData({
-          startDate,
-          endDate,
+          startDate: newStartDate,
+          endDate: newEndDate,
           timeZone,
         });
         setData(reportData);
@@ -85,14 +88,18 @@ export default function Home() {
       }
     };
 
-    fetchData();
-  }, [startDate, endDate]);
+    // Jalankan fetchData pada render pertama atau saat searchParams berubah
+    if (isFirstRender.current || searchParams.toString()) {
+      fetchData();
+      isFirstRender.current = false; // Tandai bahwa render awal sudah selesai
+    }
+  }, [searchParams, timeZone]); // Bergantung pada searchParams dan timeZone
 
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-4">
-        <div className="overflow-x-auto w-[calc(100vw-16px)] md:w-full p-4">
-          <Card className="p-8 min-h-60">
+        <div className="overflow-x-auto w-[calc(100vw-16px)] md:w-full ">
+          <Card className="p-4 md:p-8 min-h-60">
             <div className="flex items-start justify-between">
               <ExportButton
                 disable={data.length === 0}

@@ -13,7 +13,23 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-// schema.prisma
+model User {
+    id       String   @id @default(uuid())
+    name     String
+    username String   @unique
+    password String
+    ROLE     UserRole @default(USER)
+
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    usageRecords UsageRecord[]
+}
+
+enum UserRole {
+    USER
+    ADMIN
+}
+
 model Income {
     id            String      @id @default(uuid())
     date          DateTime    @default(now())
@@ -57,26 +73,26 @@ model Transaction {
 model Car {
     id           String        @id @default(uuid()) // ID unik
     name         String // Nama mobil (misal: Innova, Avanza)
-    licensePlate String        @unique // Nomor plat mobil
+    licensePlate String?       @unique // Nomor plat mobil
     status       CarStatus     @default(AVAILABLE) // Status mobil (tersedia, digunakan)
     createdAt    DateTime      @default(now())
     updatedAt    DateTime      @updatedAt
     usageRecords UsageRecord[]
 }
 
-model Driver {
-    id           String        @id @default(uuid())
-    name         String // Nama driver
-    phone        String        @unique // Nomor telepon driver
-    createdAt    DateTime      @default(now())
-    updatedAt    DateTime      @updatedAt
-    usageRecords UsageRecord[]
-}
+// model Driver {
+//     id           String        @id @default(uuid())
+//     name         String // Nama driver
+//     phone        String        @unique // Nomor telepon driver
+//     createdAt    DateTime      @default(now())
+//     updatedAt    DateTime      @updatedAt
+//     usageRecords UsageRecord[]
+// }
 
 model UsageRecord {
     id          String      @id @default(uuid())
     carId       String
-    driverId    String
+    // driverId    String
     purpose     String
     destination String
     startTime   DateTime    @default(now())
@@ -85,8 +101,10 @@ model UsageRecord {
     createdAt   DateTime    @default(now())
     updatedAt   DateTime    @updatedAt
 
-    car    Car    @relation(fields: [carId], references: [id])
-    driver Driver @relation(fields: [driverId], references: [id])
+    car    Car     @relation(fields: [carId], references: [id])
+    // driver Driver @relation(fields: [driverId], references: [id])
+    User   User?   @relation(fields: [userId], references: [id])
+    userId String?
 }
 
 enum CarStatus {

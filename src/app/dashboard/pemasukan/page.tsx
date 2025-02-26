@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { inputPemasukan } from "@/actions/keuangan";
+import PageContainer from "@/components/layout/page-container";
 
 interface Item {
   no: number;
@@ -95,112 +96,117 @@ const PemasukanPage = () => {
     );
   };
   return (
-    <div className="p-8">
-      <Card className="p-4">
-        <h1 className="text-center font-bold text-xl">Pemasukan AKASIA</h1>
-        <div className="w-full md:w-60">
-          <Label>Tanggal</Label>
-          <div className="mt-2">
-            <DatePickerDemo
-              defaultDate={selectedDate}
-              onChange={handleDateChange}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row items-center gap-4 mt-2">
+    <PageContainer>
+      <div className="flex flex-1 flex-col space-y-4">
+        <Card className="p-4">
+          <h1 className="text-center font-bold text-xl">Pemasukan AKASIA</h1>
           <div className="w-full md:w-60">
-            <Label>Keterangan</Label>
-            <Input
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-            />
+            <Label>Tanggal</Label>
+            <div className="mt-2">
+              <DatePickerDemo
+                defaultDate={selectedDate}
+                onChange={handleDateChange}
+              />
+            </div>
           </div>
-          <div className="w-full md:w-60">
-            <Label>Total</Label>
-            <Input
-              type="text"
-              inputMode="numeric"
-              value={
-                isTotalFocused
-                  ? newTotal === 0
-                    ? ""
-                    : newTotal.toString()
-                  : formatCurrency(newTotal)
-              }
-              onChange={handleTotalChange}
-              onFocus={() => setIsTotalFocused(true)}
-              onBlur={() => setIsTotalFocused(false)}
-              placeholder="Masukkan total"
-            />
-          </div>
-          <Button
-            disabled={newDescription === "" || newTotal === 0}
-            className="mt-auto w-full md:w-32"
-            onClick={handleAddIncome}
-          >
-            Tambah
-          </Button>
-        </div>
-
-        {/* Tabel */}
-        <div className="mt-4">
-          <Table>
-            <TableCaption>Daftar pemasukan terbaru.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">No</TableHead>
-                <TableHead className="w-full">Keterangan</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="text-center">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {incomes.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-gray-500">
-                    Tidak ada data
-                  </TableCell>
-                </TableRow>
-              ) : (
-                incomes.map((income) => (
-                  <TableRow key={income.no}>
-                    <TableCell>{income.no}</TableCell>
-                    <TableCell>{income.description}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(income.amount)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDeleteIncome(income.no)}
-                      >
-                        Hapus
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={2}>Total</TableCell>
-                <TableCell className="text-right">
-                  {formatCurrency(sumTotal(incomes))}
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
-          <div className="flex justify-end mt-4">
+          <div className="flex flex-col md:flex-row items-center gap-4 mt-2">
+            <div className="w-full md:w-60">
+              <Label>Keterangan</Label>
+              <Input
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+              />
+            </div>
+            <div className="w-full md:w-60">
+              <Label>Total</Label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                value={
+                  isTotalFocused
+                    ? newTotal === 0
+                      ? ""
+                      : newTotal.toString()
+                    : formatCurrency(newTotal)
+                }
+                onChange={handleTotalChange}
+                onFocus={() => setIsTotalFocused(true)}
+                onBlur={() => setIsTotalFocused(false)}
+                placeholder="Masukkan total"
+              />
+            </div>
             <Button
-              disabled={pending || incomes.length === 0}
-              onClick={handleSubmit}
+              disabled={newDescription === "" || newTotal === 0}
+              className="mt-auto w-full md:w-32"
+              onClick={handleAddIncome}
             >
-              {pending ? "Menyimpan..." : "Simpan"}
+              Tambah
             </Button>
           </div>
-        </div>
-      </Card>
-    </div>
+
+          {/* Tabel */}
+          <div className="mt-4">
+            <Table>
+              <TableCaption>Daftar pemasukan terbaru.</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">No</TableHead>
+                  <TableHead className="w-full">Keterangan</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="text-center">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {incomes.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-gray-500"
+                    >
+                      Tidak ada data
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  incomes.map((income) => (
+                    <TableRow key={income.no}>
+                      <TableCell>{income.no}</TableCell>
+                      <TableCell>{income.description}</TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(income.amount)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleDeleteIncome(income.no)}
+                        >
+                          Hapus
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={2}>Total</TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(sumTotal(incomes))}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+            <div className="flex justify-end mt-4">
+              <Button
+                disabled={pending || incomes.length === 0}
+                onClick={handleSubmit}
+              >
+                {pending ? "Menyimpan..." : "Simpan"}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </PageContainer>
   );
 };
 
