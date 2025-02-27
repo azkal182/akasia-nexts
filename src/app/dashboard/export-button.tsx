@@ -199,7 +199,9 @@ const ExportButton = ({
     // Generate PDF
     // const pdfDoc = pdfMake.createPdf(docDefinition);
     const pdfDoc = pdfMake.createPdf(docDefinition);
-    pdfDoc.download("report.pdf");
+    pdfDoc.download(
+      `laporan-${format(date.startDate, "MMMM-yyyy", { locale: id })}.pdf`
+    );
     setLoading(false);
   };
 
