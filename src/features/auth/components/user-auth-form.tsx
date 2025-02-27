@@ -15,17 +15,13 @@ import { useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
-import GithubSignInButton from "./github-auth-button";
 import { LoginSchema, LoginSchemaInput } from "@/schemas/login";
 
 export default function UserAuthForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
-  const [loading, startTransition] = useTransition();
-  const defaultValues = {
-    email: "demo@gmail.com",
-  };
+  const [isPending, startTransition] = useTransition();
+
   const form = useForm<LoginSchemaInput>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -34,75 +30,66 @@ export default function UserAuthForm() {
     },
   });
 
-  const onSubmit = async (data: LoginSchemaInput) => {
-    startTransition(() => {
-      signIn("credentials", {
-        username: data.username,
-        password: data.password,
-        callbackUrl: callbackUrl ?? "/dashboard",
-      });
+  const onSubmit = (data: LoginSchemaInput) => {
+    startTransition(async () => {
+      try {
+        await signIn("credentials", {
+          username: data.username,
+          password: data.password,
+          callbackUrl: callbackUrl ?? "/dashboard",
+        });
+      } catch (error) {
+        toast.error("Login failed");
+      }
     });
   };
 
+  // Gabungkan kedua state loading
+  const isLoading = isPending || form.formState.isSubmitting;
+
   return (
-    <>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full space-y-2"
-        >
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="Enter your Username..."
-                    disabled={loading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password..."
-                    disabled={loading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button disabled={loading} className="ml-auto w-full" type="submit">
-            Login
-          </Button>
-        </form>
-      </Form>
-      {/* <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
-      <GithubSignInButton /> */}
-    </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Enter your Username..."
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="Enter your password..."
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button disabled={isLoading} className="ml-auto w-full" type="submit">
+          {isLoading ? "Processing..." : "Login"}
+        </Button>
+      </form>
+    </Form>
   );
 }
