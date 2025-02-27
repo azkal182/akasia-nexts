@@ -98,109 +98,109 @@ export default function Home() {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-4">
-        <div className="overflow-x-auto w-[calc(100vw-16px)] md:w-full ">
-          <Card className="p-4 md:p-8 min-h-60">
-            <div className="flex items-start justify-between">
-              <ExportButton
-                disable={data.length === 0}
-                date={{
-                  startDate: startDate,
-                  endDate: endDate,
-                  timeZone: timeZone,
-                }}
-              />
-              <MonthYearSelect
-                searchParams={{
-                  startDate: format(startDate, "yyyy-MM-dd"),
-                  endDate: format(endDate, "yyyy-MM-dd"),
-                }}
-              />
+        {/* <div className="overflow-x-auto w-[calc(100vw-16px)] md:w-full "> */}
+        <Card className="p-4 md:p-8 min-h-60 max-w-[calc(100vw-2rem)] md:max-w-full">
+          <div className="flex items-start justify-between">
+            <ExportButton
+              disable={data.length === 0}
+              date={{
+                startDate: startDate,
+                endDate: endDate,
+                timeZone: timeZone,
+              }}
+            />
+            <MonthYearSelect
+              searchParams={{
+                startDate: format(startDate, "yyyy-MM-dd"),
+                endDate: format(endDate, "yyyy-MM-dd"),
+              }}
+            />
+          </div>
+          {loading ? (
+            <div className="min-h-60 flex mt-4">
+              <DataTableSkeleton columnCount={8} rowCount={5} />
             </div>
-            {loading ? (
-              <div className="min-h-60 flex mt-4">
-                <DataTableSkeleton columnCount={8} rowCount={5} />
-              </div>
-            ) : (
-              <div className="overflow-x-auto mt-4">
-                <Table className="">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>No</TableHead>
-                      <TableHead>Tanggal</TableHead>
-                      <TableHead>Keterangan</TableHead>
-                      <TableHead>Armada</TableHead>
-                      <TableHead>Pemasukan</TableHead>
-                      <TableHead>Pengeluaran</TableHead>
-                      <TableHead>Saldo</TableHead>
-                      <TableHead>Nota</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data.length > 0 ? (
-                      data?.map((item, index: number) => (
-                        <TableRow
-                          key={index}
-                          className={
-                            item.credit
-                              ? "bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900"
-                              : ""
-                          }
-                        >
-                          <TableCell>{index + 1}</TableCell>
-                          <TableCell>
-                            {format(item.date, "PPP", { locale: id })}
-                          </TableCell>
-                          <TableCell>
-                            {item.transactionDescription
-                              ? item.transactionDescription
-                              : item.itemDescription}
-                          </TableCell>
-                          <TableCell>{item.armada}</TableCell>
-                          <TableCell>
-                            {item.credit ? toRupiah(item.credit) : "-"}
-                          </TableCell>
-                          <TableCell>
-                            {item.debit ? toRupiah(item.debit) : "-"}
-                          </TableCell>
-                          <TableCell>{toRupiah(item.balance)}</TableCell>
-                          <TableCell>
-                            {item.notaPath ? (
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button size="sm">Lihat</Button>
-                                </DialogTrigger>
-                                <DialogContent className="p-6 max-w-lg max-h-[90vh] overflow-y-auto">
-                                  <DialogTitle>Nota</DialogTitle>
-                                  <div className="flex items-center justify-center">
-                                    <Image
-                                      src={item.notaPath}
-                                      alt="Nota"
-                                      width={350}
-                                      height={350}
-                                      className="rounded-lg"
-                                    />
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                            ) : (
-                              "-"
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center">
-                          Tidak ada Data
+          ) : (
+            <div className="overflow-x-auto mt-4">
+              <Table className="">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>No</TableHead>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Keterangan</TableHead>
+                    <TableHead>Armada</TableHead>
+                    <TableHead>Pemasukan</TableHead>
+                    <TableHead>Pengeluaran</TableHead>
+                    <TableHead>Saldo</TableHead>
+                    <TableHead>Nota</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.length > 0 ? (
+                    data?.map((item, index: number) => (
+                      <TableRow
+                        key={index}
+                        className={
+                          item.credit
+                            ? "bg-green-100 hover:bg-green-200 dark:bg-green-950 dark:hover:bg-green-900"
+                            : ""
+                        }
+                      >
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>
+                          {format(item.date, "PPP", { locale: id })}
+                        </TableCell>
+                        <TableCell>
+                          {item.transactionDescription
+                            ? item.transactionDescription
+                            : item.itemDescription}
+                        </TableCell>
+                        <TableCell>{item.armada}</TableCell>
+                        <TableCell>
+                          {item.credit ? toRupiah(item.credit) : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {item.debit ? toRupiah(item.debit) : "-"}
+                        </TableCell>
+                        <TableCell>{toRupiah(item.balance)}</TableCell>
+                        <TableCell>
+                          {item.notaPath ? (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="sm">Lihat</Button>
+                              </DialogTrigger>
+                              <DialogContent className="p-6 max-w-lg max-h-[90vh] overflow-y-auto">
+                                <DialogTitle>Nota</DialogTitle>
+                                <div className="flex items-center justify-center">
+                                  <Image
+                                    src={item.notaPath}
+                                    alt="Nota"
+                                    width={350}
+                                    height={350}
+                                    className="rounded-lg"
+                                  />
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          ) : (
+                            "-"
+                          )}
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </Card>
-        </div>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center">
+                        Tidak ada Data
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </Card>
+        {/* </div> */}
       </div>
     </PageContainer>
   );

@@ -98,7 +98,7 @@ const PemasukanPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-4">
-        <Card className="p-4">
+        <Card className="p-4 max-w-[calc(100vw-2rem)] md:max-w-full">
           <h1 className="text-center font-bold text-xl">Pemasukan AKASIA</h1>
           <div className="w-full md:w-60">
             <Label>Tanggal</Label>
@@ -151,7 +151,7 @@ const PemasukanPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">No</TableHead>
-                  <TableHead className="w-full">Keterangan</TableHead>
+                  <TableHead className="w-full ">Keterangan</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead className="text-center">Aksi</TableHead>
                 </TableRow>

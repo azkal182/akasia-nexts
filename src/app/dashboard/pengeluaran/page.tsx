@@ -153,7 +153,7 @@ const PengeluaranPage = () => {
   return (
     <PageContainer>
       <div className="flex flex-1 flex-col space-y-4">
-        <Card className="p-4">
+        <Card className="p-4 max-w-[calc(100vw-2rem)] md:max-w-full">
           <h1 className="text-center font-bold text-xl">Pengeluaran AKASIA</h1>
           <div>
             <Label>Tanggal</Label>
@@ -237,8 +237,8 @@ const PengeluaranPage = () => {
           </div>
 
           {/* Tabel */}
-          <div className="mt-4">
-            <Table>
+          <div className="mt-4 overflow-x-auto">
+            <Table className="w-full">
               <TableCaption>Daftar pengeluaran terbaru.</TableCaption>
               <TableHeader>
                 <TableRow>
@@ -247,6 +247,8 @@ const PengeluaranPage = () => {
                   <TableHead>Armada</TableHead>
                   <TableHead className="w-32 text-center">Jumlah</TableHead>
                   <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="text-center w-20">Aksi</TableHead>
+                  <TableHead className="text-center w-20">Aksi</TableHead>
                   <TableHead className="text-center w-20">Aksi</TableHead>
                 </TableRow>
               </TableHeader>

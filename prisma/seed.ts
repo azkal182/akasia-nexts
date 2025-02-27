@@ -22,11 +22,11 @@ const main = async () => {
         }
     ]
 
-    // await prisma.car.createMany({
-    //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //     // @ts-ignore
-    //     data: cars
-    // })
+    await prisma.car.createMany({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        data: cars
+    })
 
     await prisma.user.create({
         data: {
