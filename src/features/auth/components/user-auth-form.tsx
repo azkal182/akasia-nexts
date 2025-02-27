@@ -38,6 +38,7 @@ export default function UserAuthForm() {
           password: data.password,
           callbackUrl: callbackUrl ?? "/dashboard",
         });
+        toast.success("Signed In Successfully!");
       } catch (error) {
         toast.error("Login failed");
       }
