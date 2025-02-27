@@ -265,8 +265,6 @@ const PengeluaranPage = () => {
                   <TableHead className="w-32 text-center">Jumlah</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead className="text-center w-20">Aksi</TableHead>
-                  <TableHead className="text-center w-20">Aksi</TableHead>
-                  <TableHead className="text-center w-20">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

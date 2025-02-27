@@ -58,6 +58,15 @@ const ExportButton = ({
       }
     }
 
+    const totalPemasukan = transactions.reduce(
+      (sum, t) => sum + (t.credit || 0),
+      0
+    );
+    const totalPengeluaran = transactions.reduce(
+      (sum, t) => sum + (t.debit || 0),
+      0
+    );
+
     // **1. Halaman pertama: Laporan dalam bentuk tabel tanpa kolom Nota**
     const reportTable = {
       table: {
@@ -68,9 +77,9 @@ const ExportButton = ({
             { text: "Tanggal", bold: true },
             { text: "Deskripsi", bold: true },
             { text: "Armada", bold: true },
-            { text: "Debit", bold: true },
-            { text: "Credit", bold: true },
-            { text: "Balance", bold: true },
+            { text: "Keluar", bold: true },
+            { text: "Masuk", bold: true },
+            { text: "Saldo", bold: true },
           ],
           ...transactions.map((t) => [
             new Date(t.date).toLocaleDateString(),
@@ -80,6 +89,14 @@ const ExportButton = ({
             t.credit ? t.credit.toLocaleString() : "-",
             t.balance.toLocaleString(),
           ]),
+          [
+            { text: "Total", bold: true, colSpan: 3, alignment: "right" },
+            {},
+            {},
+            { text: totalPengeluaran.toLocaleString(), bold: true },
+            { text: totalPemasukan.toLocaleString(), bold: true },
+            {},
+          ],
         ],
       },
       layout: "lightHorizontalLines",
