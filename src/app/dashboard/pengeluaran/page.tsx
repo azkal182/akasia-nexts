@@ -57,6 +57,7 @@ const armadaList = [
   { id: "63ae5ed6-aa6b-4bc6-aa59-6306a3a73edd", name: "BIS 1" },
   { id: "41f11cad-6a44-4257-9dfb-f957955ef0a1", name: "BIS 2" },
   { id: "e5c0372e-c703-4012-82dd-e316e22ea39e", name: "AMBULANCE" },
+  { id: "ca3dd982-a906-4c69-ab75-1aad2d1d3232", name: "HI ACE" },
 ];
 
 const PengeluaranPage = () => {
