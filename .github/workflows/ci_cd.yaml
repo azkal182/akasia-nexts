@@ -1,4 +1,4 @@
-name: CI/CD Absensi
+name: CI/CD Akasia
 
 on:
   push:
@@ -102,7 +102,7 @@ jobs:
 
 
               # Restart aplikasi dengan PM2 tanpa build
-              pm2 start npm --name "absensi" -- start -- -p 4040
+              pm2 start npm --name "akasia" -- start -- -p 5050
 
               # Keluar dari SSH
               exit
