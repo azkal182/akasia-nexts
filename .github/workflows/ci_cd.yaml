@@ -39,6 +39,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           AUTH_TRUST_HOST: ${{ secrets.AUTH_TRUST_HOST }}
+          NEXTAUTH_URL: ${{ secrets.AUTH_TRUST_HOST }}
         run: pnpm build
 
       - name: Add SSH key
@@ -93,6 +94,9 @@ jobs:
               # Update variabel di file .env
               sed -i '/^DATABASE_URL=/d' .env
               echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+
+              sed -i '/^NEXTAUTH_URL=/d' .env
+              echo "NEXTAUTH_URL=${{ secrets.AUTH_TRUST_HOST }}" >> .env
 
               sed -i '/^AUTH_TRUST_HOST=/d' .env
               echo "AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}" >> .env
