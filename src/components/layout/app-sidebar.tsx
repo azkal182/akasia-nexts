@@ -44,11 +44,12 @@ import {
   GalleryVerticalEnd,
   LogOut,
 } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { Icons } from "../icons";
+import { useCurrentSession } from "@/hooks/use-current-user";
 
 export const company = {
   name: "AKASIA",
@@ -57,7 +58,7 @@ export const company = {
 };
 
 export default function AppSidebar() {
-  const { data: session } = useSession();
+  const { session } = useCurrentSession();
   const pathname = usePathname();
   const { state, isMobile } = useSidebar();
   const { setOpenMobile } = useSidebar();
