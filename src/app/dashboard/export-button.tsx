@@ -82,7 +82,7 @@ const ExportButton = ({
             { text: "Saldo", bold: true },
           ],
           ...transactions.map((t) => [
-            new Date(t.date).toLocaleDateString(),
+            format(t.date, "dd-MM-yyyy"),
             t.itemDescription ? t.itemDescription : t.transactionDescription,
             t.armada || "-",
             t.debit ? t.debit.toLocaleString() : "-",

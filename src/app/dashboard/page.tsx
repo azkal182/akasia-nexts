@@ -89,7 +89,7 @@ export default function Home() {
     };
 
     // Jalankan fetchData pada render pertama atau saat searchParams berubah
-    if (isFirstRender.current || searchParams.toString()) {
+    if (searchParams.toString()) {
       fetchData();
       isFirstRender.current = false; // Tandai bahwa render awal sudah selesai
     }

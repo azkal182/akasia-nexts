@@ -1,0 +1,109 @@
+name: CI/CD Absensi
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Print current branch
+        run: echo ${{ github.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Print DATABASE_URL
+        run: echo ${{ secrets.DATABASE_URL }}
+
+      - name: Run Prisma Migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate deploy || sleep 10 && npx prisma migrate deploy
+
+      - name: Build Next.js application
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          AUTH_TRUST_HOST: ${{ secrets.AUTH_TRUST_HOST }}
+        run: pnpm build
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: ssh-keyscan 165.22.106.176 >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          ssh -tt azkal@165.22.106.176 << 'EOF'
+              # Verifikasi apakah direktori /home/azkal/project/akasia ada
+              if [ ! -d "/home/azkal/project/akasia" ]; then
+              echo "Directory /home/azkal/project/akasia does not exist. Cloning project..."
+              git clone https://github.com/azkal182/akasia-nexts.git /home/azkal/project/akasia
+              cd /home/azkal/project/akasia
+              git checkout main
+              else
+              echo "Directory /home/azkal/project/akasia exists. Pulling latest changes..."
+              cd /home/azkal/project/akasia
+              git checkout main
+              git pull origin main
+              fi
+              exit
+          EOF
+
+      - name: Copy build files to VPS
+        run: |
+          rsync -avz --delete .next/ azkal@165.22.106.176:/home/azkal/project/akasia/.next/
+          rsync -avz --delete public/ azkal@165.22.106.176:/home/azkal/project/akasia/public/
+          rsync -avz --delete package.json pnpm-lock.yaml azkal@165.22.106.176:/home/azkal/project/akasia/
+
+      - name: Install Dependencies and Restart App
+        run: |
+          ssh -tt azkal@165.22.106.176 << 'EOF'
+              # Masuk ke direktori project
+              cd /home/azkal/project/akasia
+
+              # Hentikan aplikasi yang berjalan (jika menggunakan PM2)
+              if pm2 describe akasia > /dev/null; then
+              pm2 stop akasia
+              pm2 delete akasia
+              else
+              echo "PM2 application 'akasia' not found, skipping stop."
+              fi
+
+              # Install dependencies tanpa build
+              pnpm install --production
+
+              # Update variabel di file .env
+              sed -i '/^DATABASE_URL=/d' .env
+              echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+
+              sed -i '/^AUTH_TRUST_HOST=/d' .env
+              echo "AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}" >> .env
+
+              sed -i '/^AUTH_SECRET=/d' .env
+              echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
+
+
+              # Restart aplikasi dengan PM2 tanpa build
+              pm2 start npm --name "absensi" -- start -- -p 4040
+
+              # Keluar dari SSH
+              exit
+          EOF
