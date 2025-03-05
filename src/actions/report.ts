@@ -20,7 +20,7 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
         },
         orderBy: [
             { date: 'asc' },
-            { timeStamp: 'asc' }
+            // { timeStamp: 'asc' }
         ],
         include: {
             expense: {
