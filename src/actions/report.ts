@@ -51,7 +51,7 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
         },
         where: {
             date: {
-                lt: utcStartDate, // Ambil semua transaksi SEBELUM `startDate`
+                lt: startDate, // Ambil semua transaksi SEBELUM `startDate`
             },
         },
     });
