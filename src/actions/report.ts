@@ -15,7 +15,7 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
         where: {
             date: {
                 gte: utcStartDate,
-                lte: utcStartDate
+                lte: utcEndDate
             }
         },
         orderBy: [
