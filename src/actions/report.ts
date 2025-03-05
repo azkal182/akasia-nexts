@@ -3,9 +3,9 @@ import prisma from "@/lib/prisma";
 import { fromZonedTime } from "date-fns-tz";
 
 export const getReportData = async ({ startDate, endDate, timeZone }: { startDate: Date, endDate: Date, timeZone: string }) => {
-    const offsetMs = 7 * 60 * 60 * 1000;
-    const utcStartDate = new Date(startDate.getTime() - offsetMs);
-    const utcEndDate = new Date(endDate.getTime() - offsetMs);
+    // const offsetMs = 7 * 60 * 60 * 1000;
+    // const utcStartDate = new Date(startDate.getTime() - offsetMs);
+    // const utcEndDate = new Date(endDate.getTime() - offsetMs);
 
     // console.log('Local Jakarta (WIB):', startDate, endDate);
     // console.log('UTC:', utcStartDate, utcEndDate);
@@ -14,8 +14,8 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
     const transactionsWithItems = await prisma.transaction.findMany({
         where: {
             date: {
-                gte: utcStartDate,
-                lte: utcEndDate
+                gte: startDate,
+                lte: endDate
             }
         },
         orderBy: [
