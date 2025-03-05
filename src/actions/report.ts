@@ -3,16 +3,25 @@ import prisma from "@/lib/prisma";
 import { fromZonedTime } from "date-fns-tz";
 
 export const getReportData = async ({ startDate, endDate, timeZone }: { startDate: Date, endDate: Date, timeZone: string }) => {
-    console.log(startDate, endDate);
+    const offsetMs = 7 * 60 * 60 * 1000;
+    const utcStartDate = new Date(startDate.getTime() - offsetMs);
+    const utcEndDate = new Date(endDate.getTime() - offsetMs);
+
+    // console.log('Local Jakarta (WIB):', startDate, endDate);
+    // console.log('UTC:', utcStartDate, utcEndDate);
+
 
     const transactionsWithItems = await prisma.transaction.findMany({
         where: {
             date: {
-                gte: fromZonedTime(startDate, timeZone),
-                lte: fromZonedTime(endDate, timeZone)
+                gte: utcStartDate,
+                lte: utcEndDate
             }
         },
-        orderBy: { date: 'asc' },
+        orderBy: [
+            { date: 'asc' },
+            { timeStamp: 'asc' }
+        ],
         include: {
             expense: {
                 include: {
@@ -35,14 +44,31 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
         },
     });
 
+    const previousBalance = await prisma.transaction.aggregate({
+        _sum: {
+            debit: true,  // Total pengeluaran (expense)
+            credit: true, // Total pemasukan (income)
+        },
+        where: {
+            date: {
+                lt: utcStartDate, // Ambil semua transaksi SEBELUM `startDate`
+            },
+        },
+    });
 
-    let runningBalance = 0; // Untuk menyimpan saldo yang diperbarui
+    // Saldo awal dihitung dari total pemasukan - total pengeluaran sebelum `startDate`
+    let runningBalance = (previousBalance._sum.credit || 0) - (previousBalance._sum.debit || 0);
+    console.log("Saldo Awal:", runningBalance);
+    console.log("Running Balance Before Processing:", runningBalance);
+
+
+    // let runningBalance = 0; // Untuk menyimpan saldo yang diperbarui
     // Format data agar setiap item memiliki informasi transaksi
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const formattedData = transactionsWithItems.flatMap((transaction: any) => {
-        if (runningBalance === 0) {
-            runningBalance = transaction.balance; // Set balance awal dari transaksi pertama
-        }
+        // if (runningBalance === 0) {
+        //     runningBalance = transaction.balance; // Set balance awal dari transaksi pertama
+        // }
 
         if (transaction.expense && transaction.expense.items.length > 0) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +93,7 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
                 };
             });
         }
-        runningBalance = transaction.balance
+        runningBalance += transaction.credit
         // Jika transaksi adalah income, tambahkan tanpa mengubah balance
         return [{
             transactionId: transaction.id,

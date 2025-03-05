@@ -46,7 +46,7 @@ model Expense {
     notaFilePath  String?
     items         Item[]
     transactionId String      @unique
-    transaction   Transaction @relation(fields: [transactionId], references: [id])
+    transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 }
 
 model Item {
@@ -55,7 +55,7 @@ model Item {
     armada      String?
     quantity    Int
     total       Int
-    expense     Expense @relation(fields: [expenseId], references: [id])
+    expense     Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
     expenseId   String
 }
 
@@ -68,6 +68,8 @@ model Transaction {
     balance     Int
     income      Income?
     expense     Expense?
+
+    timeStamp DateTime? @default(now())
 }
 
 model Car {

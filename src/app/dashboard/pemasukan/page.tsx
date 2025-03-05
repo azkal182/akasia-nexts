@@ -86,6 +86,7 @@ const PemasukanPage = () => {
         loading: "Menyimpan...",
         success: (data) => {
           setPending(false);
+          setIncomes([]);
           return data?.message;
         },
         error: () => {
