@@ -57,6 +57,7 @@
         "date-fns-tz": "^3.2.0",
         "embla-carousel-react": "^8.5.2",
         "kbar": "0.1.0-beta.45",
+        "lodash": "^4.17.21",
         "lucide-react": "^0.475.0",
         "match-sorter": "^8.0.0",
         "next": "15.1.7",
@@ -86,6 +87,7 @@
     "devDependencies": {
         "@eslint/eslintrc": "^3",
         "@types/bcryptjs": "^2.4.6",
+        "@types/lodash": "^4.17.16",
         "@types/node": "^20",
         "@types/pdfmake": "^0.2.11",
         "@types/react": "^19",

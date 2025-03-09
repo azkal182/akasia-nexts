@@ -73,13 +73,14 @@ model Transaction {
 }
 
 model Car {
-    id           String        @id @default(uuid()) // ID unik
-    name         String // Nama mobil (misal: Innova, Avanza)
-    licensePlate String?       @unique // Nomor plat mobil
-    status       CarStatus     @default(AVAILABLE) // Status mobil (tersedia, digunakan)
-    createdAt    DateTime      @default(now())
-    updatedAt    DateTime      @updatedAt
-    usageRecords UsageRecord[]
+    id            String          @id @default(uuid()) // ID unik
+    name          String // Nama mobil (misal: Innova, Avanza)
+    licensePlate  String?         @unique // Nomor plat mobil
+    status        CarStatus       @default(AVAILABLE) // Status mobil (tersedia, digunakan)
+    createdAt     DateTime        @default(now())
+    updatedAt     DateTime        @updatedAt
+    usageRecords  UsageRecord[]
+    PengajuanItem PengajuanItem[]
 }
 
 // model Driver {
@@ -118,4 +119,21 @@ enum CarStatus {
 enum UsageStatus {
     ONGOING
     COMPLETED
+}
+
+model Pengajuan {
+    id    String          @id @default(uuid())
+    date  DateTime
+    items PengajuanItem[]
+}
+
+model PengajuanItem {
+    id          String     @id @default(uuid())
+    requirement String
+    cardId      String
+    car         Car        @relation(fields: [cardId], references: [id])
+    estimation  Int
+    Pengajuan   Pengajuan? @relation(fields: [pengajuanId], references: [id])
+    pengajuanId String?
+    imageUrl    String?
 }
