@@ -74,10 +74,15 @@ export async function createPengajuan(formData: PengajuanInput) {
 
 // **GET ALL PENGAJUAN**
 export async function getPengajuan() {
-    return await prisma.pengajuan.findMany({
-        include: { items: { include: { car: true } } },
-        orderBy: { date: "desc" },
-    });
+    try {
+        return await prisma.pengajuan.findMany({
+            include: { items: { include: { car: true } } },
+            orderBy: { date: "desc" },
+        });
+    } catch (error) {
+        return [];
+
+    }
 }
 
 export async function deletePengajuan(id: string) {
