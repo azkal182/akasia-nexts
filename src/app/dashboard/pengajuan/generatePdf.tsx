@@ -6,6 +6,7 @@ import { TDocumentDefinitions } from "pdfmake/interfaces";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { useState } from "react";
 
 pdfMake.vfs = pdfFonts.vfs;
 
@@ -27,6 +28,7 @@ interface PengajuanPDFProps {
 }
 
 export default function PengajuanPDF({ pengajuan }: PengajuanPDFProps) {
+  const [loading, setLoading] = useState(false);
   // **🔹 Fungsi untuk Mengonversi URL ke Base64**
   const fetchImageBase64 = async (url: string): Promise<string | null> => {
     try {
@@ -46,7 +48,9 @@ export default function PengajuanPDF({ pengajuan }: PengajuanPDFProps) {
 
   // **🔹 Fungsi untuk Membuat PDF**
   const generatePDF = async () => {
+    setLoading(true);
     const { date, items } = pengajuan;
+    console.log("Items:", items);
 
     // **🔹 Unduh semua gambar dan konversi ke base64**
     const imageBase64List = await Promise.all(
@@ -63,9 +67,11 @@ export default function PengajuanPDF({ pengajuan }: PengajuanPDFProps) {
       description: string;
     }[];
 
+    console.log("Valid Images:", validImages);
+
     // **🔹 Buat halaman lampiran dengan gambar (6 gambar per halaman)**
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lampiranPages: (object | any)[] = []; // 👈 FIX: Tambahkan tipe eksplisit
+    const lampiranPages: (object | any)[] = [];
 
     for (let i = 0; i < validImages.length; i += 6) {
       const imageRow = validImages.slice(i, i + 6);
@@ -82,11 +88,7 @@ export default function PengajuanPDF({ pengajuan }: PengajuanPDFProps) {
       });
 
       // **Tabel gambar**
-      const imagesGrid: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        table: { widths: string[]; body: Array<Array<any>> };
-        layout: string;
-      } = {
+      const imagesGrid = {
         table: {
           widths: ["50%", "50%"],
           body: [],
@@ -98,7 +100,7 @@ export default function PengajuanPDF({ pengajuan }: PengajuanPDFProps) {
       for (let j = 0; j < imageRow.length; j += 2) {
         const row = imageRow.slice(j, j + 2).map((img) => ({
           image: img.base64,
-          fit: [250, 150], // **Menjaga aspect ratio**
+          fit: [250, 150],
           alignment: "center",
         }));
 
@@ -108,7 +110,18 @@ export default function PengajuanPDF({ pengajuan }: PengajuanPDFProps) {
           margin: [0, 5],
         }));
 
+        // **Jika jumlah gambar dalam satu baris ganjil, tambahkan sel kosong**
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (row.length === 1) row.push({});
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (descriptionRow.length === 1) descriptionRow.push({ text: "" });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         imagesGrid.table.body.push(row);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         imagesGrid.table.body.push(descriptionRow);
       }
 
@@ -239,7 +252,12 @@ export default function PengajuanPDF({ pengajuan }: PengajuanPDFProps) {
     };
 
     pdfMake.createPdf(docDefinition).download(`Pengajuan_${pengajuan.id}.pdf`);
+    setLoading(false);
   };
 
-  return <Button onClick={generatePDF}>Download PDF</Button>;
+  return (
+    <Button disabled={loading} onClick={generatePDF}>
+      {loading ? "loading..." : "Download PDF"}
+    </Button>
+  );
 }
