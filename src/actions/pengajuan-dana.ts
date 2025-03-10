@@ -31,6 +31,8 @@ async function uploadImage(file: File) {
 }
 // **CREATE PENGAJUAN**
 export async function createPengajuan(formData: PengajuanInput) {
+    console.log("Prisma Object:", prisma);
+    console.log("Prisma Pengajuan:", prisma.pengajuan);
     try {
         const validatedData = PengajuanSchema.parse(formData);
 
