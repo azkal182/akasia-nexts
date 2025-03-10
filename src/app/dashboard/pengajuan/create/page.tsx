@@ -471,6 +471,26 @@ const CreatePengajuanPage = () => {
                         </TableRow>
                       );
                     })}
+
+                    {/* Tambahkan baris total */}
+                    {items.length > 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={3}
+                          style={{ fontWeight: "bold", textAlign: "right" }}
+                        >
+                          Total
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Rp
+                          {items
+                            .reduce((acc, item) => acc + item.estimation, 0)
+                            .toLocaleString()}
+                        </TableCell>
+                        <TableCell></TableCell>
+                        {/* Kosong agar sejajar dengan tombol hapus */}
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
                 <Button className="mt-4 w-full sm:w-auto" onClick={onSubmit}>
