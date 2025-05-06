@@ -50,6 +50,7 @@ export default function Home() {
   const [startDate, setStartDate] = useState<Date>(defaultStartDate);
   const [endDate, setEndDate] = useState<Date>(defaultEndDate);
   const isFirstRender = useRef(true); // Gunakan useRef untuk melacak render awal
+  const [previusBalance, setPreviusBalance] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,7 +81,8 @@ export default function Home() {
           endDate: newEndDate,
           timeZone,
         });
-        setData(reportData);
+        setPreviusBalance(reportData.previousBalance)
+        setData(reportData?.data);
       } catch (error) {
         console.error("Failed to fetch report data:", error);
       } finally {
@@ -101,7 +103,8 @@ export default function Home() {
         {/* <div className="overflow-x-auto w-[calc(100vw-16px)] md:w-full "> */}
         <Card className="p-4 md:p-8 min-h-60 max-w-[calc(100vw-2rem)] md:max-w-full">
           <div className="flex items-start justify-between">
-            <ExportButton
+           <div className="flex-col md:flex-row items-center space-x-2">
+           <ExportButton
               disable={data.length === 0}
               date={{
                 startDate: startDate,
@@ -109,6 +112,11 @@ export default function Home() {
                 timeZone: timeZone,
               }}
             />
+            <div>
+              <span>Slado Bulan Lalu:</span>
+              <span>{toRupiah(previusBalance)}</span>
+            </div>
+           </div>
             <MonthYearSelect
               searchParams={{
                 startDate: format(startDate, "yyyy-MM-dd"),
