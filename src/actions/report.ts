@@ -7,6 +7,10 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
     const utcStartDate = new Date(startDate.getTime() - offsetMs);
     const utcEndDate = new Date(endDate.getTime() - offsetMs);
 
+    // console.log('Local Jakarta (WIB):', startDate, endDate);
+    // console.log('UTC:', utcStartDate, utcEndDate);
+
+
     const transactionsWithItems = await prisma.transaction.findMany({
         where: {
             date: {
@@ -51,6 +55,7 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
             },
         },
     });
+    console.log(JSON.stringify(previousBalance, null,2))
 
     // Saldo awal dihitung dari total pemasukan - total pengeluaran sebelum `startDate`
     let runningBalance = (previousBalance._sum.credit || 0) - (previousBalance._sum.debit || 0);
@@ -109,8 +114,8 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
 
 
 
-    console.log(JSON.stringify(transactionsWithItems, null, 2));
+    // console.log(JSON.stringify(formattedData, null, 2));
 
 
-    return formattedData
+    return {previousBalance:(previousBalance._sum.credit || 0) - (previousBalance._sum.debit || 0), data: formattedData}
 }
