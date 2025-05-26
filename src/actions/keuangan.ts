@@ -223,3 +223,23 @@ export const laporanKeuangan = async () => {
         console.error('Gagal menampilkan laporan:', error);
     }
 };
+
+
+const getPengeluaranById = async (id: string) => {
+    try {
+        const data = await prisma.transaction.findUnique({
+            where: { id },
+            include: {
+                expense: true
+            }
+        })
+        if (!data) {
+            throw new Error("tidak ada data");
+
+        }
+
+        return data
+    } catch (error) {
+        throw new Error("Something went wrong!");
+    }
+}

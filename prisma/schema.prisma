@@ -22,6 +22,7 @@ model User {
 
     createdAt    DateTime      @default(now())
     updatedAt    DateTime      @updatedAt
+    driving      Boolean       @default(false)
     usageRecords UsageRecord[]
 }
 
@@ -81,6 +82,7 @@ model Car {
     updatedAt     DateTime        @updatedAt
     usageRecords  UsageRecord[]
     PengajuanItem PengajuanItem[]
+    Perizinan     Perizinan[]
 }
 
 // model Driver {
@@ -105,7 +107,7 @@ model UsageRecord {
     updatedAt   DateTime    @updatedAt
 
     car    Car     @relation(fields: [carId], references: [id])
-    // driver Driver @relation(fields: [driverId], references: [id])
+    // driver Driver  @relation(fields: [driverId], references: [id])
     User   User?   @relation(fields: [userId], references: [id])
     userId String?
 }
@@ -136,4 +138,28 @@ model PengajuanItem {
     Pengajuan   Pengajuan? @relation(fields: [pengajuanId], references: [id])
     pengajuanId String?
     imageUrl    String?
+}
+
+model Perizinan {
+    id                 String          @id @default(uuid())
+    name               String
+    purpose            String
+    destination        String
+    description        String?
+    numberOfPassengers Int
+    date               DateTime
+    estimation         Int
+    status             PerizinanStatus @default(PENDING)
+
+    carId String
+    car   Car    @relation(fields: [carId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum PerizinanStatus {
+    PENDING
+    APPROVED
+    REJECTED
 }

@@ -7,10 +7,6 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
     const utcStartDate = new Date(startDate.getTime() - offsetMs);
     const utcEndDate = new Date(endDate.getTime() - offsetMs);
 
-    // console.log('Local Jakarta (WIB):', startDate, endDate);
-    // console.log('UTC:', utcStartDate, utcEndDate);
-
-
     const transactionsWithItems = await prisma.transaction.findMany({
         where: {
             date: {
@@ -113,7 +109,7 @@ export const getReportData = async ({ startDate, endDate, timeZone }: { startDat
 
 
 
-    // console.log(JSON.stringify(transactionsWithItems, null, 2));
+    console.log(JSON.stringify(transactionsWithItems, null, 2));
 
 
     return formattedData

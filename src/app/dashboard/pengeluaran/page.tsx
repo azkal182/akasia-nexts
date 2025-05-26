@@ -157,6 +157,7 @@ const PengeluaranPage = () => {
         success: (data) => {
           setPending(false);
           setInvoices([]);
+          setNewNota(null);
           return data?.message;
         },
         error: () => {

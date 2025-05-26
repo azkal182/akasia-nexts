@@ -4,6 +4,7 @@ import { NextAuthConfig } from 'next-auth';
 import CredentialProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
 import prisma from "@/lib/prisma";
+
 const authConfig = {
     providers: [
         GithubProvider({
@@ -20,45 +21,54 @@ const authConfig = {
                 }
             },
             async authorize(credentials, req) {
-                // const user = {
-                //     id: '1',
-                //     name: 'John',
-                //     email: credentials?.email as string
-                // };
-                // if (user) {
-                //     // Any object returned will be saved in `user` property of the JWT
-                //     return user;
-                // } else {
-                //     // If you return null then an error will be displayed advising the user to check their details.
-                //     return null;
+                console.log('credentials', credentials);
 
-                //     // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
-                // }
                 const validateFields = LoginSchema.safeParse(credentials);
                 if (validateFields.success) {
                     const { username, password } = validateFields.data;
-                    console.log(username, password);
+                    console.log('testing credentials');
 
+                    console.log(username, password);
 
                     const user = await prisma.user.findUnique({
                         where: {
                             username
                         }
-                    })
-                    if (!user) return null
+                    });
 
-                    const passwordMatch = await compare(password, user.password)
+                    console.log('User found:', user ? JSON.stringify(user) : 'No user found');
 
-                    if (passwordMatch) return user
-                    return null
+
+
+                    if (!user) return null;
+
+                    const passwordMatch = await compare(password, user.password);
+                    if (passwordMatch) return user;
+                    return null;
                 }
-                // throw new Error('User not found.');
                 return null;
             }
         })
     ],
     pages: {
-        signIn: '/login' //sigin page
+        signIn: '/login' // signin page
+    },
+    callbacks: {
+        async jwt({ token, user }) {
+            // `user` hanya tersedia saat login, jadi kita tambahkan ID ke token di sini
+
+            if (user) {
+                token.id = user.id; // Menambahkan ID pengguna ke token JWT
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            // Menyertakan ID dari token ke session
+            if (token?.id) {
+                session.user.id = token.id;
+            }
+            return session;
+        }
     }
 } satisfies NextAuthConfig;
 

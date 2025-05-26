@@ -162,7 +162,9 @@ export default function Home() {
                         <TableCell>
                           {item.debit ? toRupiah(item.debit) : "-"}
                         </TableCell>
-                        <TableCell>{toRupiah(item.balance)}</TableCell>
+                        <TableCell className="text-nowrap">
+                          {toRupiah(item.balance)}
+                        </TableCell>
                         <TableCell>
                           {item.notaPath ? (
                             <Dialog>
