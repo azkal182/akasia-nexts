@@ -113,7 +113,7 @@ const ExportButton = ({
         margin: [0, 10, 0, 0],
       },
       {
-        text: format(new Date(), "MMMM yyyy", { locale: id }),
+        text: format(new Date(date.startDate), "MMMM yyyy", { locale: id }),
         style: "header",
         alignment: "center",
         margin: [0, 5, 0, 20],
