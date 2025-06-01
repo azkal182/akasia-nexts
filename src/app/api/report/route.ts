@@ -86,7 +86,6 @@ import { NextResponse } from "next/server";
 //     });
 // }
 
-
 // import { getReportData } from "@/actions/report";
 // import { format } from "date-fns";
 // import { NextResponse } from "next/server";
@@ -114,7 +113,6 @@ import { NextResponse } from "next/server";
 //     }
 // }
 
-
 // export const maxDuration = 60;
 // export async function GET() {
 //     const transactions = await getReportData()
@@ -128,7 +126,6 @@ import { NextResponse } from "next/server";
 //             // eslint-disable-next-line @typescript-eslint/no-explicit-any
 //         }, {} as Record<string, any>)
 //     );
-
 
 //     // Unduh semua gambar dan ubah ke base64
 //     for (const transaction of transactions) {
@@ -164,10 +161,7 @@ import { NextResponse } from "next/server";
 //         layout: "lightHorizontalLines",
 //         margin: [0, 20, 0, 20],
 
-
 //     };
-
-
 
 //     // **2. Halaman berikutnya: Lampiran Nota**
 //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -214,8 +208,6 @@ import { NextResponse } from "next/server";
 //         }
 //     }
 
-
-
 //     // Struktur PDF
 //     const docDefinition = {
 //         content: pages,
@@ -258,6 +250,56 @@ import { NextResponse } from "next/server";
 //     // });
 // }
 
+import prisma from "@/lib/prisma";
+
+async function getMonthlyCarExpensesPrisma(month: number, year: number) {
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+
+  // Dapatkan semua mobil
+  const cars = await prisma.car.findMany({
+    select: { id: true, name: true, licensePlate: true },
+  });
+
+  // Hitung pengeluaran per mobil
+  const reports = await Promise.all(
+    cars.map(async (car) => {
+      const expenses = await prisma.item.aggregate({
+        where: {
+          armada: { equals: car.name.trim() },
+          expense: {
+            date: { gte: startDate, lte: endDate },
+          },
+        },
+        _sum: { total: true },
+        _count: true,
+      });
+
+      console.log(car.name.trim());
+
+      return {
+        carId: car.id,
+        carName: car.name,
+        licensePlate: car.licensePlate,
+        totalExpenses: expenses._sum.total || 0,
+        transactionCount: expenses._count,
+      };
+    })
+  );
+  //   console.log({ reports });
+  return reports.filter((report) => report.transactionCount > 0);
+}
+
+// Contoh penggunaan untuk Mei 2024
+// getMonthlyCarExpenses(5, 2024).then(console.log).catch(console.error)
 export async function GET() {
-    return NextResponse.json({ data: "oke" })
+  //   const data = await prisma.transaction.findMany({
+  //     include:{
+  //         expense:{
+  //             include:{ items:{include:{}}}
+  //         }
+  //     }
+  //   });
+  const data = await getMonthlyCarExpensesPrisma(1, 2025);
+  return NextResponse.json({ data });
 }

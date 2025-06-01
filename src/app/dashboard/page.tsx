@@ -80,7 +80,8 @@ export default function Home() {
           endDate: newEndDate,
           timeZone,
         });
-        setData(reportData);
+        console.log(reportData);
+        setData(reportData.data);
       } catch (error) {
         console.error("Failed to fetch report data:", error);
       } finally {

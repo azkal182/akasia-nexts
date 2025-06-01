@@ -44,7 +44,7 @@ const ExportButton = ({
 
     // Hapus duplikasi berdasarkan transactionId
     const uniqueTransactions = Object.values(
-      transactions.reduce((acc, transaction) => {
+      transactions.data.reduce((acc, transaction) => {
         acc[transaction.transactionId] = transaction;
         return acc;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,17 +52,17 @@ const ExportButton = ({
     );
 
     // Unduh semua gambar dan ubah ke base64
-    for (const transaction of transactions) {
+    for (const transaction of transactions.data) {
       if (transaction.notaPath) {
         transaction.notaBase64 = await fetchImageAsBase64(transaction.notaPath);
       }
     }
 
-    const totalPemasukan = transactions.reduce(
+    const totalPemasukan = transactions.data.reduce(
       (sum, t) => sum + (t.credit || 0),
       0
     );
-    const totalPengeluaran = transactions.reduce(
+    const totalPengeluaran = transactions.data.reduce(
       (sum, t) => sum + (t.debit || 0),
       0
     );
@@ -81,7 +81,7 @@ const ExportButton = ({
             { text: "Keluar", bold: true },
             { text: "Saldo", bold: true },
           ],
-          ...transactions.map((t) => [
+          ...transactions.data.map((t) => [
             format(t.date, "dd-MM-yyyy"),
             t.itemDescription ? t.itemDescription : t.transactionDescription,
             t.armada || "-",
@@ -113,7 +113,7 @@ const ExportButton = ({
         margin: [0, 10, 0, 0],
       },
       {
-        text: format(new Date(), "MMMM yyyy", { locale: id }),
+        text: format(new Date(date.startDate), "MMMM yyyy", { locale: id }),
         style: "header",
         alignment: "center",
         margin: [0, 5, 0, 20],
