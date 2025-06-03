@@ -6,7 +6,7 @@ import prisma from '@/lib/prisma';
 // Zod Schema untuk validasi input
 // ---------------------
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MIN_DIMENSIONS = { width: 200, height: 200 };
 const MAX_DIMENSIONS = { width: 4096, height: 4096 };
 const ACCEPTED_IMAGE_TYPES = [
