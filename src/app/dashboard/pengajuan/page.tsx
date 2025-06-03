@@ -13,7 +13,7 @@ export default async function PengajuanList() {
 
   return (
     <PageContainer>
-      <div className="cflex flex-1 flex-col space-y-4">
+      <div className="flex flex-1 flex-col space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-2xl font-bold mb-6">Riwayat Pengajuan</p>
           <Button asChild>
