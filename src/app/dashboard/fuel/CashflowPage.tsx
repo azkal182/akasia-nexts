@@ -53,6 +53,7 @@ import Image from 'next/image';
 import {
   Popover,
   PopoverContent,
+  PopoverContentNonPortal,
   PopoverTrigger
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -288,13 +289,13 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
               </DialogContent>
             </Dialog>
 
-            <Dialog open={openFuel} onOpenChange={setOpenFuel}>
+            <Dialog open={openFuel} onOpenChange={setOpenFuel} modal={true}>
               <DialogTrigger asChild>
                 <Button variant='default'>
                   <FuelIcon /> Beli Bahan Bakar
                 </Button>
               </DialogTrigger>
-              <DialogContent className='sm:max-w-md overflow-y-scroll max-h-screen'>
+              <DialogContent className='sm:max-w-md overflow-y-scroll max-h-[80vh]'>
                 <DialogHeader>
                   <DialogTitle>Beli Bahan Bakar</DialogTitle>
                 </DialogHeader>
@@ -330,10 +331,10 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent
-                              className='w-auto p-0'
+
+                            <PopoverContentNonPortal
+                              className='w-auto p-0 z-[999]'
                               align='start'
-                              forceMount={true}
                             >
                               <Calendar
                                 mode='single'
@@ -342,7 +343,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                                 locale={id}
                                 initialFocus
                               />
-                            </PopoverContent>
+                            </PopoverContentNonPortal>
                           </Popover>
                           <FormMessage />
                         </FormItem>
