@@ -15,8 +15,8 @@ export const getReportData = async ({
   const utcStartDate = new Date(startDate.getTime() - offsetMs);
   const utcEndDate = new Date(endDate.getTime() - offsetMs);
 
-  console.log('Local Jakarta (WIB):', startDate, endDate);
-  console.log('UTC:', utcStartDate, utcEndDate);
+  console.log("Local Jakarta (WIB):", startDate, endDate);
+  console.log("UTC:", utcStartDate, utcEndDate);
 
   const transactionsWithItems = await prisma.transaction.findMany({
     where: {
@@ -63,7 +63,6 @@ export const getReportData = async ({
       },
     },
   });
-  console.log(JSON.stringify(previousBalance, null, 2));
 
   // Saldo awal dihitung dari total pemasukan - total pengeluaran sebelum `startDate`
   let runningBalance =
@@ -104,20 +103,22 @@ export const getReportData = async ({
     }
     runningBalance += transaction.credit;
     // Jika transaksi adalah income, tambahkan tanpa mengubah balance
-    console.log(JSON.stringify(({
-      transactionId: transaction.id,
-      date: transaction.date,
-      transactionDescription: transaction.description,
-      type: "income",
-      debit: transaction.debit,
-      credit: transaction.credit,
-      balance: runningBalance, // Gunakan balance yang sudah diperbarui sebelumnya
-      itemId: null,
-      itemDescription: null,
-      quantity: null,
-      total: transaction.income?.amount ?? 0,
-      armada: null,
-    })))
+    console.log(
+      JSON.stringify({
+        transactionId: transaction.id,
+        date: transaction.date,
+        transactionDescription: transaction.description,
+        type: "income",
+        debit: transaction.debit,
+        credit: transaction.credit,
+        balance: runningBalance, // Gunakan balance yang sudah diperbarui sebelumnya
+        itemId: null,
+        itemDescription: null,
+        quantity: null,
+        total: transaction.income?.amount ?? 0,
+        armada: null,
+      })
+    );
     return [
       {
         transactionId: transaction.id,

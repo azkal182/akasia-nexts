@@ -71,7 +71,8 @@ export default function FormulirPerizinanMobil() {
 
       alert("Data berhasil dikirim!");
       console.log("Response:", response.data);
-    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.error("Gagal mengirim data:", error);
       alert(
         error.response?.data?.message || "Terjadi kesalahan saat mengirim data"
