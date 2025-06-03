@@ -202,7 +202,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
     <div className='flex flex-1 flex-col space-y-4'>
       <h1 className='text-2xl font-bold mb-6'>Laporan Bulanan Cashflow</h1>
 
-      <Card className={'p-4 max-w-[calc(100vw-2rem)] md:max-w-full'}>
+      <Card className={'max-w-[calc(100vw-2rem)] md:max-w-full'}>
         <CardContent className={'pt-6'}>
           <div className='flex flex-col md:flex-row gap-4 mb-6'>
             <Select
