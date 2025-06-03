@@ -201,14 +201,14 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
     <div className='flex flex-1 flex-col space-y-4'>
       <h1 className='text-2xl font-bold mb-6'>Laporan Bulanan Cashflow</h1>
 
-      <Card>
+      <Card className={'p-4 max-w-[calc(100vw-2rem)] md:max-w-full'}>
         <CardContent className={'pt-6'}>
-          <div className='flex gap-4 mb-6'>
+          <div className='flex flex-col md:flex-row gap-4 mb-6'>
             <Select
               value={year.toString()}
               onValueChange={(value) => setYear(parseInt(value))}
             >
-              <SelectTrigger className='w-[100px]'>
+              <SelectTrigger className='w-full md:w-[100px]'>
                 <SelectValue placeholder='Tahun' />
               </SelectTrigger>
               <SelectContent>
@@ -224,7 +224,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
               value={month.toString()}
               onValueChange={(value) => setMonth(parseInt(value))}
             >
-              <SelectTrigger className='w-[150px]'>
+              <SelectTrigger className='w-full md:w-[150px]'>
                 <SelectValue placeholder='Bulan' />
               </SelectTrigger>
               <SelectContent>
@@ -333,6 +333,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                             <PopoverContent
                               className='w-auto p-0'
                               align='start'
+                              forceMount={true}
                             >
                               <Calendar
                                 mode='single'
@@ -590,13 +591,13 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                     <TableCell>{new Date(date).toLocaleDateString()}</TableCell>
                     <TableCell>{description}</TableCell>
                     <TableCell>{notes}</TableCell>
-                    <TableCell className={'text-right'}>
+                    <TableCell className={'text-right text-nowrap'}>
                       {credit ? toRupiah(credit) : '-'}
                     </TableCell>
-                    <TableCell className={'text-right'}>
+                    <TableCell className={'text-right text-nowrap'}>
                       {debit ? toRupiah(debit) : '-'}
                     </TableCell>
-                    <TableCell className='text-right font-semibold'>
+                    <TableCell className='text-right font-semibold text-nowrap'>
                       {toRupiah(runningBalance)}
                     </TableCell>
                   </TableRow>
