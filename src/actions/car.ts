@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma"
+import {Prisma} from "@prisma/client"
 
-export const getCars = async () => {
+export type CarResponse = Prisma.CarGetPayload<{}>
+export const getCars = async ():Promise<CarResponse[]> => {
     return await prisma.car.findMany()
 }

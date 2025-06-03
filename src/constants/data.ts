@@ -47,13 +47,13 @@ export const navItemsTransaction: NavItem[] = [
     isActive: false,
     items: [],
   },
-  // {
-  //   title: "Bensin",
-  //   url: "/dashboard/fuel",
-  //   icon: "fuel",
-  //   isActive: false,
-  //   items: [],
-  // },
+  {
+    title: "Bensin",
+    url: "/dashboard/fuel",
+    icon: "fuel",
+    isActive: false,
+    items: [],
+  },
 ];
 
 export const navItemsDriver: NavItem[] = [
