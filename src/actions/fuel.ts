@@ -159,42 +159,17 @@ export async function getMonthlyReport(data: unknown): Promise<ReportItem[]> {
   return report;
 }
 
-// export async function getCashflowReport(year: number, month: number) {
-//     // Ambil data cashflow pada bulan & tahun tertentu
-//     const startDate = new Date(year, month - 1, 1);
-//     const endDate = new Date(year, month, 1); // awal bulan berikutnya
-//
-//     // Query database dengan kondisi date >= startDate AND date < endDate
-//     const records = await prisma.cashflow.findMany({
-//         where: {
-//             date: {
-//                 gte: startDate,
-//                 lt: endDate,
-//             },
-//         },
-//         orderBy: { date: 'asc' },
-//     });
-//
-//     // Hitung saldo berjalan
-//     let runningBalance = 0;
-//     const report = records.map((item) => {
-//         runningBalance += (item.credit || 0) - (item.debit || 0);
-//         return {
-//             id: item.id,
-//             date: item.date,
-//             description: item.description,
-//             credit: item.credit,
-//             debit: item.debit,
-//             runningBalance,
-//         };
-//     });
-//
-//     return report;
-// }
-
+function getLocalDate(year: number, month: number, day: number): Date {
+  const utcDate = new Date(Date.UTC(year, month, day));
+  // geser +7 jam ke depan
+  utcDate.setUTCHours(utcDate.getUTCHours() - 7);
+  return utcDate;
+}
 export async function getCashflowReport(year: number, month: number) {
-  const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 1);
+  // const startDate = new Date(year, month - 1, 1);
+  // const endDate = new Date(year, month, 1);
+  const startDate = getLocalDate(year, month - 1, 1); // 1 Juni 00:00 WIB
+  const endDate = getLocalDate(year, month, 1); // 1 Juli 00:00 WIB
 
   const records = await prisma.cashflow.findMany({
     where: {
