@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useTransition } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -60,6 +60,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
+import { toast } from 'sonner';
 
 type IncomeFormInput = z.infer<typeof receiveIncomeSchema>;
 type PurchaseFuelFormInput = z.infer<typeof purchaseFuelSchema>;
@@ -81,6 +82,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [filename, setFilename] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isPending, startTransition] = useTransition();
   // Dialog state
   const [openIncome, setOpenIncome] = useState(false);
   const [openFuel, setOpenFuel] = useState(false);
@@ -130,6 +132,11 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
     }
   });
 
+  const isLoading =
+    isPending ||
+    formIncome.formState.isSubmitting ||
+    formFuel.formState.isSubmitting;
+
   // Load report setiap kali year/month berubah
   useEffect(() => {
     async function fetchReport() {
@@ -143,50 +150,111 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
 
   // Submit handler income
   async function onSubmitIncome(data: IncomeFormInput) {
-    try {
-      const res = await fetch('/api/cashflow/receive-income', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!res.ok) throw new Error('Gagal tambah pemasukan');
-      formIncome.reset();
-      setOpenIncome(false);
-      // refresh laporan
-      const reportRes = await fetch(
-        `/api/cashflow/report?year=${year}&month=${month}`
-      ).then((r) => r.json());
-      setReport(reportRes);
-    } catch (e) {
-      alert((e as Error).message);
-    }
+    startTransition(async () => {
+      try {
+        const res = await fetch('/api/cashflow/receive-income', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) {
+          throw new Error('Gagal tambah pemasukan');
+        }
+
+        // Reset form dan tutup modal
+        formIncome.reset();
+        setOpenIncome(false);
+
+        // Refresh laporan
+        const reportRes = await fetch(
+          `/api/cashflow/report?year=${year}&month=${month}`
+        ).then((r) => r.json());
+
+        setReport(reportRes);
+        toast.success('Pemasukan berhasil ditambahkan!');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        toast.error(error.message || 'Terjadi kesalahan');
+      }
+    });
+    // try {
+    //
+    //   const res = await fetch('/api/cashflow/receive-income', {
+    //     method: 'POST',
+    //     body: JSON.stringify(data),
+    //     headers: { 'Content-Type': 'application/json' }
+    //   });
+    //   if (!res.ok) throw new Error('Gagal tambah pemasukan');
+    //   formIncome.reset();
+    //   setOpenIncome(false);
+    //   // refresh laporan
+    //   const reportRes = await fetch(
+    //     `/api/cashflow/report?year=${year}&month=${month}`
+    //   ).then((r) => r.json());
+    //   setReport(reportRes);
+    // } catch (e) {
+    //   alert((e as Error).message);
+    // }
   }
 
   // Submit handler fuel
   async function onSubmitFuel(data: PurchaseFuelFormInput) {
-    try {
-      const formData = objectToFormData(data);
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
+    startTransition(async () => {
+      try {
+        const formData = objectToFormData(data);
+
+        for (const [key, value] of formData.entries()) {
+          console.log(`${key}:`, value);
+        }
+
+        const res = await fetch('/api/cashflow/purchase-fuel', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          throw new Error('Gagal tambah pembelian bahan bakar');
+        }
+
+        formFuel.reset();
+        setPreviewUrl(null);
+        setOpenFuel(false);
+
+        const reportRes = await fetch(
+          `/api/cashflow/report?year=${year}&month=${month}`
+        ).then((r) => r.json());
+
+        setReport(reportRes);
+        toast.success('Pembelian bahan bakar berhasil ditambahkan!');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        toast.error(e.message || 'Terjadi kesalahan saat mengirim data');
       }
-
-      const res = await fetch('/api/cashflow/purchase-fuel', {
-        method: 'POST',
-        body: formData
-        // headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      if (!res.ok) throw new Error('Gagal tambah pembelian bahan bakar');
-      formFuel.reset();
-      setPreviewUrl(null);
-      setOpenFuel(false);
-      const reportRes = await fetch(
-        `/api/cashflow/report?year=${year}&month=${month}`
-      ).then((r) => r.json());
-
-      setReport(reportRes);
-    } catch (e) {
-      alert((e as Error).message);
-    }
+    });
+    // try {
+    //   const formData = objectToFormData(data);
+    //   for (const [key, value] of formData.entries()) {
+    //     console.log(`${key}:`, value);
+    //   }
+    //
+    //   const res = await fetch('/api/cashflow/purchase-fuel', {
+    //     method: 'POST',
+    //     body: formData
+    //     // headers: { 'Content-Type': 'multipart/form-data' }
+    //   });
+    //   if (!res.ok) throw new Error('Gagal tambah pembelian bahan bakar');
+    //   formFuel.reset();
+    //   setPreviewUrl(null);
+    //   setOpenFuel(false);
+    //   const reportRes = await fetch(
+    //     `/api/cashflow/report?year=${year}&month=${month}`
+    //   ).then((r) => r.json());
+    //
+    //   setReport(reportRes);
+    // } catch (e) {
+    //   alert((e as Error).message);
+    // }
   }
 
   // List bulan sederhana
@@ -356,7 +424,9 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                     </div>
 
                     <DialogFooter className={'mt-4'}>
-                      <Button type='submit'>Simpan</Button>
+                      <Button disabled={isLoading} type='submit'>
+                        {isLoading ? 'Processing...' : 'Simpan'}
+                      </Button>
                     </DialogFooter>
                   </form>
                 </Form>
@@ -661,7 +731,9 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                     />
 
                     <DialogFooter>
-                      <Button type='submit'>Simpan</Button>
+                      <Button disabled={isLoading} type='submit'>
+                        {isLoading ? 'Processing...' : 'Simpan'}
+                      </Button>
                     </DialogFooter>
                   </form>
                 </Form>
