@@ -26,8 +26,9 @@ const formatBytes = (bytes: number, decimals = 2) => {
 };
 
 export const receiveIncomeSchema = z.object({
-  amount: z.number().int().positive(),
+  amount: z.coerce.number().int().positive(),
   source: z.string().optional().default('Yayasan'),
+  date: z.coerce.date(),
   notes: z.string().optional()
 });
 
@@ -59,6 +60,7 @@ export const getMonthlyReportSchema = z.object({
 
 export async function receiveIncome(data: unknown) {
   const validated = receiveIncomeSchema.parse(data);
+  const incomeDate = validated.date ? new Date(validated.date) : new Date(); // default: sekarang
 
   return await prisma.$transaction(async (tx) => {
     const cashflow = await tx.cashflow.create({
@@ -66,6 +68,7 @@ export async function receiveIncome(data: unknown) {
         type: CashflowType.INCOME,
         amount: validated.amount,
         description: `Penerimaan dana dari ${validated.source}`,
+        date: incomeDate,
         income: {
           create: {
             source: validated.source,

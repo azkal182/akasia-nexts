@@ -91,15 +91,22 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
   };
 
   // --- Form react-hook-form for income ---
-  const {
-    register: registerIncome,
-    handleSubmit: handleSubmitIncome,
-    reset: resetIncome,
-    formState: { errors: errorsIncome }
-  } = useForm<IncomeFormInput>({
-    resolver: zodResolver(receiveIncomeSchema)
-  });
+  // const {
+  //   register: registerIncome,
+  //   handleSubmit: handleSubmitIncome,
+  //   reset: resetIncome,
+  //   formState: { errors: errorsIncome }
+  // } = useForm<IncomeFormInput>({
+  //   resolver: zodResolver(receiveIncomeSchema)
+  // });
 
+  const formIncome = useForm<IncomeFormInput>({
+    resolver: zodResolver(receiveIncomeSchema),
+    defaultValues: {
+      source: 'YAYASAN',
+      amount: 0
+    }
+  });
   // --- Form react-hook-form for fuel purchase ---
   // const {
   //     register: registerFuel,
@@ -143,7 +150,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
         headers: { 'Content-Type': 'application/json' }
       });
       if (!res.ok) throw new Error('Gagal tambah pemasukan');
-      resetIncome();
+      formIncome.reset();
       setOpenIncome(false);
       // refresh laporan
       const reportRes = await fetch(
@@ -248,44 +255,149 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                     Isi formulir untuk mencatat pemasukan baru.
                   </DialogDescription>
                 </DialogHeader>
+                <Form {...formIncome}>
+                  <form onSubmit={formIncome.handleSubmit(onSubmitIncome)}>
+                    <div className={'flex flex-col gap-1'}>
+                      <FormField
+                        control={formIncome.control}
+                        name={'date'}
+                        render={({ field }) => (
+                          <FormItem className='flex flex-col'>
+                            <FormLabel>Tanggal</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={'outline'}
+                                    className={cn(
+                                      'w-full pl-3 text-left font-normal',
+                                      !field.value && 'text-muted-foreground'
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, 'PPP', {
+                                        locale: id
+                                      })
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
 
-                <form
-                  onSubmit={handleSubmitIncome(onSubmitIncome)}
-                  className='space-y-4 mt-4'
-                >
-                  <div>
-                    <Label htmlFor='amountIncome'>Jumlah (Rp)</Label>
-                    <Input
-                      id='amountIncome'
-                      type='number'
-                      {...registerIncome('amount', { valueAsNumber: true })}
-                    />
-                    {errorsIncome.amount && (
-                      <p className='text-red-600 text-sm'>
-                        {errorsIncome.amount.message}
-                      </p>
-                    )}
-                  </div>
+                              <PopoverContentNonPortal
+                                className='w-auto p-0 z-[999]'
+                                align='start'
+                              >
+                                <Calendar
+                                  mode='single'
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  locale={id}
+                                  initialFocus
+                                />
+                              </PopoverContentNonPortal>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <div>
-                    <Label htmlFor='sourceIncome'>Sumber</Label>
-                    <Input
-                      id='sourceIncome'
-                      {...registerIncome('source')}
-                      placeholder='Yayasan'
-                      defaultValue={'Yayasan'}
-                    />
-                  </div>
+                      <FormField
+                        control={formIncome.control}
+                        name={'amount'}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Jumlah (Rp)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type='number'
+                                onFocus={(e) => e.target.select()}
+                                {...field}
+                                ref={(el) => {
+                                  field.ref(el); // ref dari react-hook-form
+                                  inputAmountRef.current = el; // ref lokal kita
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <div>
-                    <Label htmlFor='notesIncome'>Catatan</Label>
-                    <Input id='notesIncome' {...registerIncome('notes')} />
-                  </div>
+                      <FormField
+                        control={formIncome.control}
+                        name={'source'}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Sumbar Dana</FormLabel>
+                            <FormControl>
+                              <Input type={'text'} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <DialogFooter>
-                    <Button type='submit'>Simpan</Button>
-                  </DialogFooter>
-                </form>
+                      <FormField
+                        control={formIncome.control}
+                        name={'notes'}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Catatan</FormLabel>
+                            <FormControl>
+                              <Input type={'text'} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <DialogFooter className={'mt-4'}>
+                      <Button type='submit'>Simpan</Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+
+                {/*<form*/}
+                {/*  onSubmit={handleSubmitIncome(onSubmitIncome)}*/}
+                {/*  className='space-y-4 mt-4'*/}
+                {/*>*/}
+                {/*  <div>*/}
+                {/*    <Label htmlFor='amountIncome'>Jumlah (Rp)</Label>*/}
+                {/*    <Input*/}
+                {/*      id='amountIncome'*/}
+                {/*      type='number'*/}
+                {/*      {...registerIncome('amount', { valueAsNumber: true })}*/}
+                {/*    />*/}
+                {/*    {errorsIncome.amount && (*/}
+                {/*      <p className='text-red-600 text-sm'>*/}
+                {/*        {errorsIncome.amount.message}*/}
+                {/*      </p>*/}
+                {/*    )}*/}
+                {/*  </div>*/}
+
+                {/*  <div>*/}
+                {/*    <Label htmlFor='sourceIncome'>Sumber</Label>*/}
+                {/*    <Input*/}
+                {/*      id='sourceIncome'*/}
+                {/*      {...registerIncome('source')}*/}
+                {/*      placeholder='Yayasan'*/}
+                {/*      defaultValue={'Yayasan'}*/}
+                {/*    />*/}
+                {/*  </div>*/}
+
+                {/*  <div>*/}
+                {/*    <Label htmlFor='notesIncome'>Catatan</Label>*/}
+                {/*    <Input id='notesIncome' {...registerIncome('notes')} />*/}
+                {/*  </div>*/}
+
+                {/*  <DialogFooter>*/}
+                {/*    <Button type='submit'>Simpan</Button>*/}
+                {/*  </DialogFooter>*/}
+                {/*</form>*/}
               </DialogContent>
             </Dialog>
 
@@ -564,9 +676,9 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                 <TableHead>Tanggal</TableHead>
                 <TableHead>Deskripsi</TableHead>
                 <TableHead>Catatan</TableHead>
-                <TableHead>Pemasukan</TableHead>
-                <TableHead>Pengeluaran</TableHead>
-                <TableHead>Saldo</TableHead>
+                <TableHead className={'text-right'}>Pemasukan</TableHead>
+                <TableHead className={'text-right'}>Pengeluaran</TableHead>
+                <TableHead className={'text-right'}>Saldo</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -580,7 +692,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
 
               {report.map(
                 ({
-                  id,
+                  id: idReport,
                   date,
                   description,
                   credit,
@@ -588,8 +700,13 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                   runningBalance,
                   notes
                 }) => (
-                  <TableRow key={id}>
-                    <TableCell>{new Date(date).toLocaleDateString()}</TableCell>
+                  <TableRow key={idReport}>
+                    {/*<TableCell>{new Date(date).toLocaleDateString()}</TableCell>*/}
+                    <TableCell>
+                      {format(date, 'PPP', {
+                        locale: id
+                      })}
+                    </TableCell>
                     <TableCell>{description}</TableCell>
                     <TableCell>{notes}</TableCell>
                     <TableCell className={'text-right text-nowrap'}>
