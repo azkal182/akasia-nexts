@@ -89,6 +89,7 @@ jobs:
               fi
 
               # Install dependencies tanpa build
+              pnpm run postinstall
               pnpm install --production
 
               # Update variabel di file .env

@@ -26,6 +26,7 @@ const formatBytes = (bytes: number, decimals = 2) => {
 };
 
 export const receiveIncomeSchema = z.object({
+  id: z.string().optional(),
   amount: z.coerce.number().int().positive(),
   source: z.string().optional().default('Yayasan'),
   date: z.coerce.date(),
@@ -33,6 +34,7 @@ export const receiveIncomeSchema = z.object({
 });
 
 export const purchaseFuelSchema = z.object({
+  id: z.string().optional(),
   carId: z.string().uuid(),
   fuelType: z.enum([FuelType.BENSIN, FuelType.SOLAR]),
   amount: z.coerce.number().int().positive(),
@@ -200,7 +202,8 @@ export async function getCashflowReport(year: number, month: number) {
       notes: item.income?.notes ?? item.fuelUsage?.notes ?? null,
       credit: credit || null,
       debit: debit || null,
-      runningBalance
+      runningBalance,
+      receiptFile: item.type === 'EXPENSE' ? item.fuelUsage?.receiptFile : null
     };
   });
 

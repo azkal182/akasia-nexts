@@ -61,11 +61,15 @@ import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { toast } from 'sonner';
+import Link from 'next/link';
+import { DeleteButtonFuel } from '@/components/deleteButtonFuel';
+import { useRouter } from 'next/navigation';
+import ExportPdfButton from './exportPdfButton';
 
 type IncomeFormInput = z.infer<typeof receiveIncomeSchema>;
 type PurchaseFuelFormInput = z.infer<typeof purchaseFuelSchema>;
 
-type ReportItem = {
+export type ReportItem = {
   id: string;
   date: string;
   description: string | null;
@@ -73,6 +77,7 @@ type ReportItem = {
   credit: number;
   debit: number;
   runningBalance: number;
+  receiptFile: string | null;
 };
 
 export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
@@ -83,24 +88,19 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
   const [filename, setFilename] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isPending, startTransition] = useTransition();
-  // Dialog state
+
   const [openIncome, setOpenIncome] = useState(false);
   const [openFuel, setOpenFuel] = useState(false);
   const inputAmountRef = useRef<HTMLInputElement>(null);
+  const [selectedIncome, setSelectedIncome] = useState<IncomeFormInput | null>(
+    null
+  );
+  const [selectedFuel, setSelectedFuel] =
+    useState<PurchaseFuelFormInput | null>(null);
 
   const handleFocus = () => {
     inputAmountRef.current?.select();
   };
-
-  // --- Form react-hook-form for income ---
-  // const {
-  //   register: registerIncome,
-  //   handleSubmit: handleSubmitIncome,
-  //   reset: resetIncome,
-  //   formState: { errors: errorsIncome }
-  // } = useForm<IncomeFormInput>({
-  //   resolver: zodResolver(receiveIncomeSchema)
-  // });
 
   const formIncome = useForm<IncomeFormInput>({
     resolver: zodResolver(receiveIncomeSchema),
@@ -430,44 +430,6 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                     </DialogFooter>
                   </form>
                 </Form>
-
-                {/*<form*/}
-                {/*  onSubmit={handleSubmitIncome(onSubmitIncome)}*/}
-                {/*  className='space-y-4 mt-4'*/}
-                {/*>*/}
-                {/*  <div>*/}
-                {/*    <Label htmlFor='amountIncome'>Jumlah (Rp)</Label>*/}
-                {/*    <Input*/}
-                {/*      id='amountIncome'*/}
-                {/*      type='number'*/}
-                {/*      {...registerIncome('amount', { valueAsNumber: true })}*/}
-                {/*    />*/}
-                {/*    {errorsIncome.amount && (*/}
-                {/*      <p className='text-red-600 text-sm'>*/}
-                {/*        {errorsIncome.amount.message}*/}
-                {/*      </p>*/}
-                {/*    )}*/}
-                {/*  </div>*/}
-
-                {/*  <div>*/}
-                {/*    <Label htmlFor='sourceIncome'>Sumber</Label>*/}
-                {/*    <Input*/}
-                {/*      id='sourceIncome'*/}
-                {/*      {...registerIncome('source')}*/}
-                {/*      placeholder='Yayasan'*/}
-                {/*      defaultValue={'Yayasan'}*/}
-                {/*    />*/}
-                {/*  </div>*/}
-
-                {/*  <div>*/}
-                {/*    <Label htmlFor='notesIncome'>Catatan</Label>*/}
-                {/*    <Input id='notesIncome' {...registerIncome('notes')} />*/}
-                {/*  </div>*/}
-
-                {/*  <DialogFooter>*/}
-                {/*    <Button type='submit'>Simpan</Button>*/}
-                {/*  </DialogFooter>*/}
-                {/*</form>*/}
               </DialogContent>
             </Dialog>
 
@@ -599,34 +561,6 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                       )}
                     />
 
-                    {/*<FormField*/}
-                    {/*  control={formFuel.control}*/}
-                    {/*  name='receiptFile'*/}
-                    {/*  render={({ field }) => (*/}
-                    {/*    <FormItem>*/}
-                    {/*      <FormLabel className=''>Upload Bukti</FormLabel>*/}
-                    {/*      <FormControl>*/}
-                    {/*        <Input*/}
-                    {/*          type='file'*/}
-                    {/*          accept='.jpg,.jpeg,.png'*/}
-                    {/*          onChange={(e) => {*/}
-                    {/*            const file = e.target.files?.[0];*/}
-                    {/*            field.onChange(file);*/}
-                    {/*            if (file) {*/}
-                    {/*              const previewUrl = URL.createObjectURL(file);*/}
-                    {/*              setPhotoPreview(previewUrl);*/}
-                    {/*            } else {*/}
-                    {/*              setPhotoPreview(null);*/}
-                    {/*            }*/}
-                    {/*          }}*/}
-                    {/*          //   className='border-gray-300 focus:border-blue-500'*/}
-                    {/*        />*/}
-                    {/*      </FormControl>*/}
-                    {/*      <FormMessage />*/}
-                    {/*    </FormItem>*/}
-                    {/*  )}*/}
-                    {/*/>*/}
-
                     <FormField
                       control={formFuel.control}
                       name='notes'
@@ -739,6 +673,7 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                 </Form>
               </DialogContent>
             </Dialog>
+            <ExportPdfButton data={report} />
           </div>
 
           {/* Tabel laporan */}
@@ -751,12 +686,14 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                 <TableHead className={'text-right'}>Pemasukan</TableHead>
                 <TableHead className={'text-right'}>Pengeluaran</TableHead>
                 <TableHead className={'text-right'}>Saldo</TableHead>
+                <TableHead className={'text-center'}>Nota</TableHead>
+                <TableHead className={'text-center'}>Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {report.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className='text-center p-4'>
+                  <TableCell colSpan={7} className='text-center p-4'>
                     Tidak ada data
                   </TableCell>
                 </TableRow>
@@ -770,7 +707,8 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                   credit,
                   debit,
                   runningBalance,
-                  notes
+                  notes,
+                  receiptFile
                 }) => (
                   <TableRow key={idReport}>
                     {/*<TableCell>{new Date(date).toLocaleDateString()}</TableCell>*/}
@@ -789,6 +727,44 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                     </TableCell>
                     <TableCell className='text-right font-semibold text-nowrap'>
                       {toRupiah(runningBalance)}
+                    </TableCell>
+                    <TableCell className='text-center'>
+                      {receiptFile ? (
+                        <Link
+                          className='underline text-primary'
+                          href={receiptFile}
+                          target='_blank'
+                        >
+                          Nota
+                        </Link>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell className='flex items-centern  space-x-2'>
+                      {/* <Button
+                        size={'sm'}
+                        onClick={() => {
+                            if (credit) {
+                              alert('pemasukan');
+                            } else {
+                              alert('pengeluaran');
+                            }
+                        }}
+                      >
+                        Edit
+                      </Button> */}
+                      <DeleteButtonFuel
+                        idReport={idReport}
+                        onDeleted={async () => {
+                          toast.success('Data Berhasil Dihapus');
+                          const reportRes = await fetch(
+                            `/api/cashflow/report?year=${year}&month=${month}`
+                          ).then((r) => r.json());
+
+                          setReport(reportRes);
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 )

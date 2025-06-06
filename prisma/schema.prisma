@@ -5,72 +5,72 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model User {
-  id       String   @id @default(uuid())
-  name     String
-  username String   @unique
-  password String
-  ROLE     UserRole @default(USER)
+    id       String   @id @default(uuid())
+    name     String
+    username String   @unique
+    password String
+    ROLE     UserRole @default(USER)
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  driving      Boolean       @default(false)
-  usageRecords UsageRecord[]
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    driving      Boolean       @default(false)
+    usageRecords UsageRecord[]
 }
 
 enum UserRole {
-  USER
-  ADMIN
+    USER
+    ADMIN
 }
 
 model Income {
-  id            String      @id @default(uuid())
-  date          DateTime    @default(now())
-  amount        Int
-  description   String
-  transactionId String      @unique
-  transaction   Transaction @relation(fields: [transactionId], references: [id])
+    id            String      @id @default(uuid())
+    date          DateTime    @default(now())
+    amount        Int
+    description   String
+    transactionId String      @unique
+    transaction   Transaction @relation(fields: [transactionId], references: [id])
 }
 
 model Expense {
-  id            String      @id @default(uuid())
-  date          DateTime    @default(now())
-  total         Int
-  notaFilePath  String?
-  items         Item[]
-  transactionId String      @unique
-  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+    id            String      @id @default(uuid())
+    date          DateTime    @default(now())
+    total         Int
+    notaFilePath  String?
+    items         Item[]
+    transactionId String      @unique
+    transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 }
 
 model Item {
-  id          String  @id @default(uuid())
-  description String
-  armada      String?
-  quantity    Int
-  total       Int
-  expense     Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  expenseId   String
+    id          String  @id @default(uuid())
+    description String
+    armada      String?
+    quantity    Int
+    total       Int
+    expense     Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+    expenseId   String
 }
 
 model Transaction {
-  id          String   @id @default(uuid())
-  date        DateTime @default(now())
-  description String
-  debit       Int      @default(0)
-  credit      Int      @default(0)
-  balance     Int
-  income      Income?
-  expense     Expense?
+    id          String   @id @default(uuid())
+    date        DateTime @default(now())
+    description String
+    debit       Int      @default(0)
+    credit      Int      @default(0)
+    balance     Int
+    income      Income?
+    expense     Expense?
 
-  timeStamp DateTime? @default(now())
+    timeStamp DateTime? @default(now())
 }
 
 // model Driver {
@@ -83,125 +83,151 @@ model Transaction {
 // }
 
 model UsageRecord {
-  id          String      @id @default(uuid())
-  carId       String
-  // driverId    String
-  purpose     String
-  destination String
-  startTime   DateTime    @default(now())
-  endTime     DateTime?
-  status      UsageStatus @default(ONGOING)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+    id          String      @id @default(uuid())
+    carId       String
+    // driverId    String
+    purpose     String
+    destination String
+    startTime   DateTime    @default(now())
+    endTime     DateTime?
+    status      UsageStatus @default(ONGOING)
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
 
-  car    Car     @relation(fields: [carId], references: [id])
-  // driver Driver  @relation(fields: [driverId], references: [id])
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+    car    Car     @relation(fields: [carId], references: [id])
+    // driver Driver  @relation(fields: [driverId], references: [id])
+    User   User?   @relation(fields: [userId], references: [id])
+    userId String?
 }
 
 enum CarStatus {
-  AVAILABLE
-  IN_USE
+    AVAILABLE
+    IN_USE
 }
 
 // ENUM untuk status pemakaian
 enum UsageStatus {
-  ONGOING
-  COMPLETED
+    ONGOING
+    COMPLETED
 }
 
 model Pengajuan {
-  id    String          @id @default(uuid())
-  date  DateTime
-  items PengajuanItem[]
+    id    String          @id @default(uuid())
+    date  DateTime
+    items PengajuanItem[]
 }
 
 model PengajuanItem {
-  id          String     @id @default(uuid())
-  requirement String
-  cardId      String
-  car         Car        @relation(fields: [cardId], references: [id])
-  estimation  Int
-  Pengajuan   Pengajuan? @relation(fields: [pengajuanId], references: [id])
-  pengajuanId String?
-  imageUrl    String?
+    id          String     @id @default(uuid())
+    requirement String
+    cardId      String
+    car         Car        @relation(fields: [cardId], references: [id])
+    estimation  Int
+    Pengajuan   Pengajuan? @relation(fields: [pengajuanId], references: [id])
+    pengajuanId String?
+    imageUrl    String?
 }
 
 model Perizinan {
-  id                 String          @id @default(uuid())
-  name               String
-  purpose            String
-  destination        String
-  description        String?
-  numberOfPassengers Int
-  date               DateTime
-  estimation         Int
-  status             PerizinanStatus @default(PENDING)
+    id                 String          @id @default(uuid())
+    name               String
+    purpose            String
+    destination        String
+    description        String?
+    numberOfPassengers Int
+    date               DateTime
+    estimation         Int
+    status             PerizinanStatus @default(PENDING)
 
-  carId String
-  car   Car    @relation(fields: [carId], references: [id])
+    carId String
+    car   Car    @relation(fields: [carId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 enum PerizinanStatus {
-  PENDING
-  APPROVED
-  REJECTED
+    PENDING
+    APPROVED
+    REJECTED
 }
 
 model Car {
-  id            String          @id @default(uuid()) // ID unik
-  name          String // Nama mobil (misal: Innova, Avanza)
-  licensePlate  String?         @unique // Nomor plat mobil
-  status        CarStatus       @default(AVAILABLE) // Status mobil (tersedia, digunakan)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  usageRecords  UsageRecord[]
-  PengajuanItem PengajuanItem[]
-  Perizinan     Perizinan[]
+    id            String          @id @default(uuid()) // ID unik
+    name          String // Nama mobil (misal: Innova, Avanza)
+    licensePlate  String?         @unique // Nomor plat mobil
+    status        CarStatus       @default(AVAILABLE) // Status mobil (tersedia, digunakan)
+    createdAt     DateTime        @default(now())
+    updatedAt     DateTime        @updatedAt
+    usageRecords  UsageRecord[]
+    PengajuanItem PengajuanItem[]
+    Perizinan     Perizinan[]
 
-  fuelUsages FuelUsage[]
+    fuelUsages FuelUsage[]
+    taxes      Tax[]
 }
 
 model Cashflow {
-  id          String       @id @default(uuid())
-  type        CashflowType
-  amount      Int
-  date        DateTime     @default(now())
-  description String?
+    id          String       @id @default(uuid())
+    type        CashflowType
+    amount      Int
+    date        DateTime     @default(now())
+    description String?
 
-  income    CashIncome?
-  fuelUsage FuelUsage?
+    income    CashIncome?
+    fuelUsage FuelUsage?
 }
 
 enum CashflowType {
-  INCOME
-  EXPENSE
+    INCOME
+    EXPENSE
 }
 
 model CashIncome {
-  id         String   @id @default(uuid())
-  source     String
-  notes      String?
-  cashflow   Cashflow @relation(fields: [cashflowId], references: [id])
-  cashflowId String   @unique
+    id         String   @id @default(uuid())
+    source     String
+    notes      String?
+    cashflow   Cashflow @relation(fields: [cashflowId], references: [id], onDelete: Cascade)
+    cashflowId String   @unique
 }
 
 enum FuelType {
-  SOLAR
-  BENSIN
+    SOLAR
+    BENSIN
 }
 
 model FuelUsage {
-  id          String   @id @default(uuid())
-  car         Car      @relation(fields: [carId], references: [id])
-  carId       String
-  fuelType    FuelType
-  receiptFile String?
-  notes       String?
-  cashflow    Cashflow @relation(fields: [cashflowId], references: [id])
-  cashflowId  String   @unique
+    id          String   @id @default(uuid())
+    car         Car      @relation(fields: [carId], references: [id])
+    carId       String
+    fuelType    FuelType
+    receiptFile String?
+    notes       String?
+    cashflow    Cashflow @relation(fields: [cashflowId], references: [id], onDelete: Cascade)
+    cashflowId  String   @unique
+}
+
+model Tax {
+    id       String       @id @default(uuid())
+    carId    String
+    type     TaxType
+    dueDate  DateTime
+    isPaid   Boolean      @default(false)
+    paidAt   DateTime?
+    notes    String?
+    car      Car          @relation(fields: [carId], references: [id])
+    payments TaxPayment[]
+}
+
+model TaxPayment {
+    id     String   @id @default(uuid())
+    taxId  String
+    paidAt DateTime
+    notes  String?
+    tax    Tax      @relation(fields: [taxId], references: [id])
+}
+
+enum TaxType {
+    ANNUAL
+    FIVE_YEAR
 }
