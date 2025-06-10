@@ -2,6 +2,12 @@ import prisma from '@/lib/prisma';
 import { hash } from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
+export async function GET(request: Request) {
+  return NextResponse.json(
+    { message: 'This is the registration endpoint' },
+    { status: 200 }
+  );
+}
 export async function POST(request: Request) {
   try {
     const { username, password, name } = await request.json();
@@ -10,6 +16,8 @@ export async function POST(request: Request) {
     const existingUser = await prisma.user.findUnique({
       where: { username }
     });
+
+    console.log('existingUser');
 
     if (existingUser) {
       return NextResponse.json(
