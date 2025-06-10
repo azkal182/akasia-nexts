@@ -220,42 +220,42 @@
 
 // export default CreatePengajuanPage;
 
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useRef } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  SelectValue
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { createPengajuan, getCars } from "@/actions/pengajuan-dana";
-import { toast } from "sonner";
+  FormMessage
+} from '@/components/ui/form';
+import { createPengajuan, getCars } from '@/actions/pengajuan-dana';
+import { toast } from 'sonner';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useRouter } from "next/navigation";
-import PageContainer from "@/components/layout/page-container";
+  TableRow
+} from '@/components/ui/table';
+import { useRouter } from 'next/navigation';
+import PageContainer from '@/components/layout/page-container';
 
 type Car = {
   id: string;
@@ -263,10 +263,10 @@ type Car = {
 };
 
 const pengajuanSchema = z.object({
-  requirement: z.string().min(1, "Kebutuhan harus diisi"),
-  cardId: z.string().min(1, "Pilih kendaraan"),
-  estimation: z.coerce.number().min(1, "Estimasi harus lebih dari 0"),
-  image: z.instanceof(File, { message: "Gambar harus diunggah" }),
+  requirement: z.string().min(1, 'Kebutuhan harus diisi'),
+  cardId: z.string().min(1, 'Pilih kendaraan'),
+  estimation: z.coerce.number().min(1, 'Estimasi harus lebih dari 0'),
+  image: z.instanceof(File, { message: 'Gambar harus diunggah' }).optional()
 });
 
 type PengajuanItem = z.infer<typeof pengajuanSchema>;
@@ -275,11 +275,11 @@ const CreatePengajuanPage = () => {
   const form = useForm<PengajuanItem>({
     resolver: zodResolver(pengajuanSchema),
     defaultValues: {
-      requirement: "",
-      cardId: "",
+      requirement: '',
+      cardId: '',
       estimation: 0,
-      image: undefined,
-    },
+      image: undefined
+    }
   });
 
   const [cars, setCars] = useState<Car[]>([]);
@@ -296,7 +296,7 @@ const CreatePengajuanPage = () => {
     setItems([...items, data]);
     form.reset();
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Kosongkan tampilan input file
+      fileInputRef.current.value = ''; // Kosongkan tampilan input file
     }
   };
 
@@ -306,25 +306,25 @@ const CreatePengajuanPage = () => {
 
   const onSubmit = async () => {
     if (items.length === 0) {
-      toast.error("Harap tambahkan minimal satu kebutuhan.");
+      toast.error('Harap tambahkan minimal satu kebutuhan.');
       return;
     }
 
     const response = await createPengajuan({ items });
     if (response?.error) {
-      toast.error("Terjadi kesalahan");
+      toast.error('Terjadi kesalahan');
     } else {
-      toast.success("Data telah tersimpan.");
+      toast.success('Data telah tersimpan.');
       setItems([]);
       form.reset();
 
-      router.push("/dashboard/pengajuan");
+      router.push('/dashboard/pengajuan');
     }
   };
 
   return (
     <PageContainer>
-      <div className="flex flex-1 flex-col space-y-4">
+      <div className='flex flex-1 flex-col space-y-4'>
         <Card>
           <CardHeader>
             <CardTitle>Form Pengajuan Dana</CardTitle>
@@ -333,16 +333,16 @@ const CreatePengajuanPage = () => {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(addItem)}
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4 items-end"
+                className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4 items-end'
               >
                 <FormField
-                  name="requirement"
+                  name='requirement'
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Kebutuhan</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Kebutuhan" />
+                        <Input {...field} placeholder='Kebutuhan' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -350,7 +350,7 @@ const CreatePengajuanPage = () => {
                 />
 
                 <FormField
-                  name="cardId"
+                  name='cardId'
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
@@ -358,10 +358,10 @@ const CreatePengajuanPage = () => {
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value || ""}
+                          value={field.value || ''}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Pilih Kendaraan" />
+                            <SelectValue placeholder='Pilih Kendaraan' />
                           </SelectTrigger>
                           <SelectContent>
                             {cars.map((car) => (
@@ -378,7 +378,7 @@ const CreatePengajuanPage = () => {
                 />
 
                 <FormField
-                  name="estimation"
+                  name='estimation'
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
@@ -390,15 +390,15 @@ const CreatePengajuanPage = () => {
                       placeholder="Estimasi Biaya"
                     /> */}
                         <Input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          placeholder="Estimasi Biaya"
-                          value={field.value || ""}
+                          type='text'
+                          inputMode='numeric'
+                          pattern='[0-9]*'
+                          placeholder='Estimasi Biaya'
+                          value={field.value || ''}
                           onChange={(e) => {
                             const numericValue = e.target.value.replace(
                               /\D/g,
-                              ""
+                              ''
                             ); // Hanya izinkan angka
                             field.onChange(numericValue);
                           }}
@@ -410,7 +410,7 @@ const CreatePengajuanPage = () => {
                 />
 
                 <FormField
-                  name="image"
+                  name='image'
                   control={form.control}
                   render={({ field: { onChange } }) => (
                     <FormItem>
@@ -418,8 +418,8 @@ const CreatePengajuanPage = () => {
                       <FormControl>
                         <Input
                           ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
+                          type='file'
+                          accept='image/*'
                           onChange={(e) => onChange(e.target.files?.[0])}
                         />
                       </FormControl>
@@ -428,7 +428,7 @@ const CreatePengajuanPage = () => {
                   )}
                 />
 
-                <Button type="submit" className="w-full sm:w-auto">
+                <Button type='submit' className='w-full sm:w-auto'>
                   Tambah Kebutuhan
                 </Button>
               </form>
@@ -436,7 +436,7 @@ const CreatePengajuanPage = () => {
 
             {items.length > 0 && (
               <>
-                <h2 className="mt-6 text-lg font-semibold">Daftar Kebutuhan</h2>
+                <h2 className='mt-6 text-lg font-semibold'>Daftar Kebutuhan</h2>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -455,14 +455,14 @@ const CreatePengajuanPage = () => {
                           <TableCell>{index + 1}</TableCell>
                           <TableCell>{item.requirement}</TableCell>
                           <TableCell>
-                            {car ? car.name : "Tidak Diketahui"}
+                            {car ? car.name : 'Tidak Diketahui'}
                           </TableCell>
                           <TableCell>
                             Rp {item.estimation.toLocaleString()}
                           </TableCell>
                           <TableCell>
                             <Button
-                              variant="destructive"
+                              variant='destructive'
                               onClick={() => removeItem(index)}
                             >
                               Hapus
@@ -477,11 +477,11 @@ const CreatePengajuanPage = () => {
                       <TableRow>
                         <TableCell
                           colSpan={3}
-                          style={{ fontWeight: "bold", textAlign: "right" }}
+                          style={{ fontWeight: 'bold', textAlign: 'right' }}
                         >
                           Total
                         </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
+                        <TableCell style={{ fontWeight: 'bold' }}>
                           Rp
                           {items
                             .reduce((acc, item) => acc + item.estimation, 0)
@@ -493,7 +493,7 @@ const CreatePengajuanPage = () => {
                     )}
                   </TableBody>
                 </Table>
-                <Button className="mt-4 w-full sm:w-auto" onClick={onSubmit}>
+                <Button className='mt-4 w-full sm:w-auto' onClick={onSubmit}>
                   Simpan Pengajuan
                 </Button>
               </>
