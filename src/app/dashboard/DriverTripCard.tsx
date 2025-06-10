@@ -62,7 +62,7 @@ export default function DriverTripCard({
         {currentStatus.status === 'ONGOING' && (
           //   <Button onClick={() => onComplete(currentStatus.id)}>Selesai</Button>
           <ConfirmDialog
-            title='Hapus Data'
+            title='Konfirmasi Selesai Perjalanan'
             description={`Apakah Perjalanan ke ${currentStatus.destination} keperluan ${currentStatus.purpose} sudah selesai?`}
             data={currentStatus}
             onSubmit={(data) =>

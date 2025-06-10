@@ -9,8 +9,13 @@ import React from 'react';
 interface DriverModePageProps {
   currentStatus?: UsageRecord | null;
   onComplete?: ({ id, userId }: { id: string; userId: string }) => void;
+  onGo?: () => void;
 }
-const DriverModePage = ({ currentStatus, onComplete }: DriverModePageProps) => {
+const DriverModePage = ({
+  currentStatus,
+  onComplete,
+  onGo
+}: DriverModePageProps) => {
   const [cars, setCars] = React.useState<CarResponse[]>([]);
   React.useEffect(() => {
     // Simulate fetching cars data
@@ -35,7 +40,15 @@ const DriverModePage = ({ currentStatus, onComplete }: DriverModePageProps) => {
           />
         ) : (
           <div>
-            <CarListing cars={cars} />
+            <CarListing
+              cars={cars}
+              goButton={true}
+              onGo={() => {
+                if (onGo) {
+                  onGo();
+                }
+              }}
+            />
           </div>
         )}
       </div>

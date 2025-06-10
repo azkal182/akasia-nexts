@@ -21,7 +21,7 @@ export default function CarUsageHistory({ data }: Props) {
     <Card>
       <CardContent className='p-4'>
         <h2 className='text-xl font-semibold mb-4'>Histori Penggunaan Mobil</h2>
-        <div className='overflow-x-auto'>
+        <div className=''>
           <Table>
             <TableHeader>
               <TableRow>
@@ -39,10 +39,10 @@ export default function CarUsageHistory({ data }: Props) {
                   <TableCell>{item.car.name}</TableCell>
                   <TableCell>{item.destination}</TableCell>
                   <TableCell>{item.purpose}</TableCell>
-                  <TableCell>
+                  <TableCell className='whitespace-nowrap'>
                     {format(new Date(item.startTime), 'dd MMM yyyy HH:mm')}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className='whitespace-nowrap'>
                     {format(new Date(item!.endTime!), 'dd MMM yyyy HH:mm')}
                   </TableCell>
                   <TableCell>{item!.User!.name}</TableCell>

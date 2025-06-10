@@ -40,6 +40,8 @@ import { toast } from 'sonner';
 interface CarListingProps {
   cars: Car[];
   addButton?: Boolean;
+  goButton?: Boolean;
+  onGo?: () => void;
 }
 
 // Form validation schema
@@ -59,7 +61,12 @@ const formCarSchema = z.object({
 
 type FormCarInput = z.infer<typeof formCarSchema>;
 
-const CarListing = ({ cars, addButton = false }: CarListingProps) => {
+const CarListing = ({
+  cars,
+  addButton = false,
+  goButton = false,
+  onGo
+}: CarListingProps) => {
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const session = useCurrentSession();
@@ -110,8 +117,11 @@ const CarListing = ({ cars, addButton = false }: CarListingProps) => {
       });
 
       if (response.ok) {
-        alert('Mobil berhasil dicatat keluar');
+        toast.success('Mobil berhasil dicatat keluar');
         closeDialog();
+        if (onGo) {
+          onGo();
+        }
       } else {
         const errorData = await response.json();
         alert(errorData.message || 'Terjadi kesalahan saat menyimpan data');
@@ -162,9 +172,9 @@ const CarListing = ({ cars, addButton = false }: CarListingProps) => {
                 <TableRow>
                   <TableHead>No</TableHead>
                   <TableHead>Nama</TableHead>
+                  {goButton && <TableHead>Berangkat</TableHead>}
                   <TableHead>Plat</TableHead>
                   <TableHead>Tersedia</TableHead>
-                  <TableHead>Drive</TableHead>
                   <TableHead>Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -173,6 +183,21 @@ const CarListing = ({ cars, addButton = false }: CarListingProps) => {
                   <TableRow key={car.id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{car.name}</TableCell>
+                    {goButton && (
+                      <TableCell>
+                        {car.status === 'AVAILABLE' ? (
+                          <Button
+                            onClick={() => setSelectedCar(car)}
+                            size='sm'
+                            variant='outline'
+                          >
+                            <CarIcon /> Berangkat
+                          </Button>
+                        ) : (
+                          <Button size='sm'>Info</Button>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell>{car.licensePlate}</TableCell>
                     <TableCell>
                       {car.status === 'AVAILABLE' ? (
@@ -185,19 +210,7 @@ const CarListing = ({ cars, addButton = false }: CarListingProps) => {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      {car.status === 'AVAILABLE' ? (
-                        <Button
-                          onClick={() => setSelectedCar(car)}
-                          size='sm'
-                          variant='outline'
-                        >
-                          <CarIcon /> Berangkat
-                        </Button>
-                      ) : (
-                        <Button size='sm'>Info</Button>
-                      )}
-                    </TableCell>
+
                     <TableCell>aksi</TableCell>
                   </TableRow>
                 ))}

@@ -84,6 +84,7 @@ export default function Home() {
       <DriverModePage
         currentStatus={currentStatus}
         onComplete={(data) => onComplete(data)}
+        onGo={() => getCurrentUser()}
       />
     );
   } else {
