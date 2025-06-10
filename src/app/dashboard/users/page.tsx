@@ -1,13 +1,17 @@
+import { getUsers } from '@/actions/users';
+import PageContainer from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
+import UsersPageView from '@/features/profile/users-page-view';
 import React from 'react';
 
-const UsersPage = () => {
+const UsersPage = async () => {
+  const users = await getUsers();
   return (
-    <div className='flex min-h-screen items-center justify-center'>
-      <div className='rounded-xl border p-32 text-2xl text-blue-600 shadow'>
-        <Button>Azkal</Button>
+    <PageContainer>
+      <div className='flex flex-1 flex-col space-y-4'>
+        <UsersPageView users={users} />
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

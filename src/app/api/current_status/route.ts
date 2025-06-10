@@ -27,13 +27,14 @@ export async function GET() {
       );
     }
 
-    const ongoingRecord = await prisma.usageRecord.findFirst({
+    const ongoingRecord = await prisma.usageRecord.findMany({
       where: {
         userId: session?.user.id,
         status: 'ONGOING'
       },
       include: {
-        car: true
+        car: true,
+        User: true
       }
     });
 

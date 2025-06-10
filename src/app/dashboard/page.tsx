@@ -5,6 +5,8 @@ import { useModeStore } from '@/store/modeStore';
 import { toast } from 'sonner';
 import DriverModePage from '@/features/dashboard/driver-mode/driver-mode-page';
 import AdminModePage from '@/features/dashboard/admin-mode/admin-mode-page';
+import { CurrentStatus } from '../../../types/current-status';
+import { CarResponse, getCars } from '@/actions/car';
 
 export type Car = {
   id: string;
@@ -32,8 +34,19 @@ export type UsageRecord = {
 export default function Home() {
   const mode = useModeStore((state) => state.mode);
 
-  const [currentStatus, setCurrentStatus] = useState<UsageRecord | null>();
+  const [currentStatus, setCurrentStatus] = useState<CurrentStatus[]>();
+  const [cars, setCars] = useState<CarResponse[]>([]);
 
+  // Simulate fetching cars data
+  const fetchCars = async () => {
+    // Replace with actual API call
+    const fetchedCars = await await getCars();
+    setCars(fetchedCars);
+  };
+
+  useEffect(() => {
+    fetchCars();
+  }, []);
   const getCurrentUser = async () => {
     try {
       const response = await fetch('/api/current_status');
@@ -70,8 +83,8 @@ export default function Home() {
       }
 
       toast.success('Perjalanan selesai');
-      setCurrentStatus(null);
-      //   window.location.reload(); // Reload halaman untuk memperbarui data
+      getCurrentUser();
+      fetchCars();
     } catch (error) {
       console.error('Error completing trip:', error);
       toast.error('Gagal menyelesaikan perjalanan');
@@ -84,7 +97,11 @@ export default function Home() {
       <DriverModePage
         currentStatus={currentStatus}
         onComplete={(data) => onComplete(data)}
-        onGo={() => getCurrentUser()}
+        onGo={() => {
+          getCurrentUser();
+          fetchCars();
+        }}
+        cars={cars}
       />
     );
   } else {

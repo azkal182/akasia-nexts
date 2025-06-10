@@ -3,9 +3,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { type UsageRecord } from './page';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { CurrentStatus } from '../../../types/current-status';
 
 interface DriverTripCardProps {
-  currentStatus: UsageRecord;
+  currentStatus: CurrentStatus;
   onComplete: ({ id, userId }: { id: string; userId: string }) => void;
 }
 
@@ -14,7 +15,7 @@ export default function DriverTripCard({
   onComplete
 }: DriverTripCardProps) {
   return (
-    <Card className='p-4 sm:p-6 mx-2 sm:mx-auto max-w-7xl'>
+    <Card className='p-4 sm:p-6 '>
       <CardContent className='p-0 space-y-5'>
         <div className='flex flex-col gap-4'>
           <div className='flex flex-col'>
@@ -41,10 +42,7 @@ export default function DriverTripCard({
             </span>
             <span className='text-lg font-medium text-gray-400 mt-1'>
               {currentStatus.startTime
-                ? format(
-                    new Date(currentStatus.startTime),
-                    'dd MMM yyyy - HH:mm'
-                  )
+                ? format(new Date(currentStatus.startTime), 'dd/MM/yyyy HH:mm')
                 : '-'}
             </span>
           </div>
@@ -57,6 +55,14 @@ export default function DriverTripCard({
               {currentStatus.car.name}
             </span>
           </div>
+          <div className='flex flex-col'>
+            <span className='text-sm font-medium  uppercase tracking-wide'>
+              Driver
+            </span>
+            <span className='text-lg font-medium text-gray-400 mt-1'>
+              {currentStatus?.User?.name}
+            </span>
+          </div>
         </div>
 
         {currentStatus.status === 'ONGOING' && (
@@ -66,7 +72,7 @@ export default function DriverTripCard({
             description={`Apakah Perjalanan ke ${currentStatus.destination} keperluan ${currentStatus.purpose} sudah selesai?`}
             data={currentStatus}
             onSubmit={(data) =>
-              onComplete({ id: data!.id, userId: data!.userId })
+              onComplete({ id: data!.id, userId: data!.userId! })
             }
             trigger={<Button>Selesai</Button>}
           />

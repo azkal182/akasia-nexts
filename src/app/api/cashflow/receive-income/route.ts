@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
-import {receiveIncome} from "@/actions/fuel";
+import { receiveIncome } from '@/actions/fuel';
+import { auth } from '@/lib/auth';
 
 export async function POST(request: Request) {
-    try {
-        const data = await request.json();
-        const cashflow = await receiveIncome(data);
-        return NextResponse.json(cashflow);
-    } catch (e) {
-        return NextResponse.json({ error: (e as Error).message }, { status: 400 });
-    }
+  const user = await auth();
+  try {
+    const userId = user!.user!.id;
+    const data = await request.json();
+    const cashflow = await receiveIncome(data, userId);
+    return NextResponse.json(cashflow);
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+  }
 }

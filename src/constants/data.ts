@@ -82,6 +82,17 @@ export const navItemsDriver: NavItem[] = [
     items: []
   }
 ];
+
+export const navItemsAdmin: NavItem[] = [
+  {
+    title: 'Users',
+    url: '/dashboard/users',
+    icon: 'user',
+    isActive: false,
+    // shortcut: ["c", "c"],
+    items: []
+  }
+];
 export interface SaleUser {
   id: number;
   name: string;

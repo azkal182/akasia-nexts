@@ -12,7 +12,11 @@ interface Income {
   amount: number;
 }
 
-export const inputPemasukan = async (date: Date, incomes: Income[]) => {
+export const inputPemasukan = async (
+  date: Date,
+  incomes: Income[],
+  userId: string
+) => {
   try {
     // Hitung saldo terakhir
     const lastTransaction = await prisma.transaction.findFirst({
@@ -33,7 +37,8 @@ export const inputPemasukan = async (date: Date, incomes: Income[]) => {
           description,
           credit: amount,
           debit: 0,
-          balance: newBalance
+          balance: newBalance,
+          userId
         }
       });
 
@@ -144,7 +149,8 @@ export const inputPengeluaran = async (
   date: Date,
   note: string,
   items: ItemInput[],
-  notaFile: File
+  notaFile: File,
+  userId: string
 ) => {
   try {
     // Upload file nota dan dapatkan path-nya
@@ -169,7 +175,8 @@ export const inputPengeluaran = async (
         description: note,
         debit: totalAmount,
         credit: 0,
-        balance: newBalance
+        balance: newBalance,
+        userId
       }
     });
 

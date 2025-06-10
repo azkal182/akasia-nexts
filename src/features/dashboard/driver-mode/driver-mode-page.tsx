@@ -1,56 +1,58 @@
 'use client';
-import { CarResponse, getCars } from '@/actions/car';
+import { CarResponse } from '@/actions/car';
 import DriverTripCard from '@/app/dashboard/DriverTripCard';
-import { UsageRecord } from '@/app/dashboard/page';
 import PageContainer from '@/components/layout/page-container';
 import CarListing from '@/features/car/car-listing';
 import React from 'react';
+import { CurrentStatus } from '../../../../types/current-status';
+import { useCurrentSession } from '@/hooks/use-current-user';
 
 interface DriverModePageProps {
-  currentStatus?: UsageRecord | null;
+  currentStatus?: CurrentStatus[];
   onComplete?: ({ id, userId }: { id: string; userId: string }) => void;
   onGo?: () => void;
+  cars?: CarResponse[];
 }
 const DriverModePage = ({
   currentStatus,
   onComplete,
-  onGo
+  onGo,
+  cars = []
 }: DriverModePageProps) => {
-  const [cars, setCars] = React.useState<CarResponse[]>([]);
-  React.useEffect(() => {
-    // Simulate fetching cars data
-    const fetchCars = async () => {
-      // Replace with actual API call
-      const fetchedCars = await await getCars();
-      setCars(fetchedCars);
-    };
-
-    fetchCars();
-  }, []);
+  const { session } = useCurrentSession();
   return (
     <PageContainer>
       <div className='flex flex-1 flex-col space-y-4'>
         <h1 className='text-lg font-semibold'>
-          Selamat Datang di Dashboard Driver
+          Selamat Datang {session?.user.name}
         </h1>
-        {currentStatus ? (
-          <DriverTripCard
-            currentStatus={currentStatus}
-            onComplete={(data) => onComplete?.(data)}
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+          {currentStatus &&
+            currentStatus.length > 0 &&
+            currentStatus.map((status) => (
+              <DriverTripCard
+                key={status.id}
+                currentStatus={status}
+                onComplete={({ id, userId }) => {
+                  if (onComplete) {
+                    onComplete({ id, userId });
+                  }
+                }}
+              />
+            ))}
+        </div>
+
+        <div>
+          <CarListing
+            cars={cars}
+            goButton={true}
+            onGo={() => {
+              if (onGo) {
+                onGo();
+              }
+            }}
           />
-        ) : (
-          <div>
-            <CarListing
-              cars={cars}
-              goButton={true}
-              onGo={() => {
-                if (onGo) {
-                  onGo();
-                }
-              }}
-            />
-          </div>
-        )}
+        </div>
       </div>
     </PageContainer>
   );

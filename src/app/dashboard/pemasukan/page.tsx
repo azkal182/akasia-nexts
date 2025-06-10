@@ -1,10 +1,10 @@
-"use client";
-import { DatePickerDemo } from "@/components/date-picker-demo";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+'use client';
+import { DatePickerDemo } from '@/components/date-picker-demo';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -13,11 +13,12 @@ import {
   TableFooter,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { toast } from "sonner";
-import { inputPemasukan } from "@/actions/keuangan";
-import PageContainer from "@/components/layout/page-container";
+  TableRow
+} from '@/components/ui/table';
+import { toast } from 'sonner';
+import { inputPemasukan } from '@/actions/keuangan';
+import PageContainer from '@/components/layout/page-container';
+import { useCurrentSession } from '@/hooks/use-current-user';
 
 interface Item {
   no: number;
@@ -27,14 +28,14 @@ interface Item {
 
 const PemasukanPage = () => {
   const [incomes, setIncomes] = useState<Item[]>([]);
-  const [newDescription, setNewDescription] = useState<string>("");
+  const [newDescription, setNewDescription] = useState<string>('');
   const [newTotal, setNewTotal] = useState<number>(0);
   const [isTotalFocused, setIsTotalFocused] = useState(false);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     new Date()
   );
   const [pending, setPending] = useState(false);
-
+  const { session } = useCurrentSession();
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
   };
@@ -44,10 +45,10 @@ const PemasukanPage = () => {
   }
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
     }).format(value);
   };
 
@@ -55,11 +56,11 @@ const PemasukanPage = () => {
     const newIncome: Item = {
       no: incomes.length + 1,
       description: newDescription,
-      amount: newTotal,
+      amount: newTotal
     };
 
     setIncomes((prevIncomes) => [...prevIncomes, newIncome]);
-    setNewDescription("");
+    setNewDescription('');
     setNewTotal(0);
   };
 
@@ -70,7 +71,7 @@ const PemasukanPage = () => {
   };
 
   const handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value.replace(/[^\d]/g, "");
+    const rawValue = e.target.value.replace(/[^\d]/g, '');
     const numericValue = rawValue ? parseInt(rawValue, 10) : 0;
     setNewTotal(numericValue);
   };
@@ -80,10 +81,10 @@ const PemasukanPage = () => {
     toast.promise(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      inputPemasukan(selectedDate, incomes),
+      inputPemasukan(selectedDate, incomes, session!.user!.id),
       {
-        position: "top-right",
-        loading: "Menyimpan...",
+        position: 'top-right',
+        loading: 'Menyimpan...',
         success: (data) => {
           setPending(false);
           setIncomes([]);
@@ -91,54 +92,54 @@ const PemasukanPage = () => {
         },
         error: () => {
           setPending(false);
-          return "Gagal mencatat pemasukan";
-        },
+          return 'Gagal mencatat pemasukan';
+        }
       }
     );
   };
   return (
     <PageContainer>
-      <div className="flex flex-1 flex-col space-y-4">
-        <Card className="p-4 max-w-[calc(100vw-2rem)] md:max-w-full">
-          <h1 className="text-center font-bold text-xl">Pemasukan AKASIA</h1>
-          <div className="w-full md:w-60">
+      <div className='flex flex-1 flex-col space-y-4'>
+        <Card className='p-4 max-w-[calc(100vw-2rem)] md:max-w-full'>
+          <h1 className='text-center font-bold text-xl'>Pemasukan AKASIA</h1>
+          <div className='w-full md:w-60'>
             <Label>Tanggal</Label>
-            <div className="mt-2">
+            <div className='mt-2'>
               <DatePickerDemo
                 defaultDate={selectedDate}
                 onChange={handleDateChange}
               />
             </div>
           </div>
-          <div className="flex flex-col md:flex-row items-center gap-4 mt-2">
-            <div className="w-full md:w-60">
+          <div className='flex flex-col md:flex-row items-center gap-4 mt-2'>
+            <div className='w-full md:w-60'>
               <Label>Keterangan</Label>
               <Input
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
               />
             </div>
-            <div className="w-full md:w-60">
+            <div className='w-full md:w-60'>
               <Label>Total</Label>
               <Input
-                type="text"
-                inputMode="numeric"
+                type='text'
+                inputMode='numeric'
                 value={
                   isTotalFocused
                     ? newTotal === 0
-                      ? ""
+                      ? ''
                       : newTotal.toString()
                     : formatCurrency(newTotal)
                 }
                 onChange={handleTotalChange}
                 onFocus={() => setIsTotalFocused(true)}
                 onBlur={() => setIsTotalFocused(false)}
-                placeholder="Masukkan total"
+                placeholder='Masukkan total'
               />
             </div>
             <Button
-              disabled={newDescription === "" || newTotal === 0}
-              className="mt-auto w-full md:w-32"
+              disabled={newDescription === '' || newTotal === 0}
+              className='mt-auto w-full md:w-32'
               onClick={handleAddIncome}
             >
               Tambah
@@ -146,15 +147,15 @@ const PemasukanPage = () => {
           </div>
 
           {/* Tabel */}
-          <div className="mt-4">
+          <div className='mt-4'>
             <Table>
               <TableCaption>Daftar pemasukan terbaru.</TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">No</TableHead>
-                  <TableHead className="w-full ">Keterangan</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-center">Aksi</TableHead>
+                  <TableHead className='w-[100px]'>No</TableHead>
+                  <TableHead className='w-full '>Keterangan</TableHead>
+                  <TableHead className='text-right'>Total</TableHead>
+                  <TableHead className='text-center'>Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -162,7 +163,7 @@ const PemasukanPage = () => {
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      className="text-center text-gray-500"
+                      className='text-center text-gray-500'
                     >
                       Tidak ada data
                     </TableCell>
@@ -172,12 +173,12 @@ const PemasukanPage = () => {
                     <TableRow key={income.no}>
                       <TableCell>{income.no}</TableCell>
                       <TableCell>{income.description}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className='text-right'>
                         {formatCurrency(income.amount)}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className='text-center'>
                         <Button
-                          variant="destructive"
+                          variant='destructive'
                           onClick={() => handleDeleteIncome(income.no)}
                         >
                           Hapus
@@ -190,18 +191,18 @@ const PemasukanPage = () => {
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={2}>Total</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className='text-right'>
                     {formatCurrency(sumTotal(incomes))}
                   </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
-            <div className="flex justify-end mt-4">
+            <div className='flex justify-end mt-4'>
               <Button
                 disabled={pending || incomes.length === 0}
                 onClick={handleSubmit}
               >
-                {pending ? "Menyimpan..." : "Simpan"}
+                {pending ? 'Menyimpan...' : 'Simpan'}
               </Button>
             </div>
           </div>

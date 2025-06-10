@@ -1,7 +1,7 @@
 'use client';
 
 import { RecordResponse } from '@/actions/usage-record';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -18,9 +18,13 @@ type Props = {
 
 export default function CarUsageHistory({ data }: Props) {
   return (
-    <Card>
+    <Card className={'max-w-[calc(100vw-2rem)] md:max-w-full'}>
       <CardContent className='p-4'>
-        <h2 className='text-xl font-semibold mb-4'>Histori Penggunaan Mobil</h2>
+        <CardHeader>
+          <h2 className='text-xl font-semibold mb-4'>
+            Histori Penggunaan Mobil
+          </h2>
+        </CardHeader>
         <div className=''>
           <Table>
             <TableHeader>
@@ -30,7 +34,7 @@ export default function CarUsageHistory({ data }: Props) {
                 <TableHead>Keperluan</TableHead>
                 <TableHead>Mulai</TableHead>
                 <TableHead>Selesai</TableHead>
-                <TableHead>Pengguna</TableHead>
+                <TableHead>Driver</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -45,7 +49,9 @@ export default function CarUsageHistory({ data }: Props) {
                   <TableCell className='whitespace-nowrap'>
                     {format(new Date(item!.endTime!), 'dd MMM yyyy HH:mm')}
                   </TableCell>
-                  <TableCell>{item!.User!.name}</TableCell>
+                  <TableCell className='whitespace-nowrap'>
+                    {item!.User!.name}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

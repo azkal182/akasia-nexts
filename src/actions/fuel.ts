@@ -60,7 +60,7 @@ export const getMonthlyReportSchema = z.object({
 // Fungsi Prisma dengan input validasi Zod
 // ---------------------
 
-export async function receiveIncome(data: unknown) {
+export async function receiveIncome(data: unknown, userId: string) {
   const validated = receiveIncomeSchema.parse(data);
   const incomeDate = validated.date ? new Date(validated.date) : new Date(); // default: sekarang
 
@@ -76,7 +76,8 @@ export async function receiveIncome(data: unknown) {
             source: validated.source,
             notes: validated.notes
           }
-        }
+        },
+        userId: userId // simpan userId yang menerima income
       },
       include: { income: true }
     });
@@ -85,7 +86,7 @@ export async function receiveIncome(data: unknown) {
   });
 }
 
-export async function purchaseFuel(data: unknown) {
+export async function purchaseFuel(data: unknown, userId: string) {
   const validated = purchaseFuelSchema.parse(data);
 
   return await prisma.$transaction(async (tx) => {
@@ -101,7 +102,8 @@ export async function purchaseFuel(data: unknown) {
             receiptFile: validated.receiptFile as unknown as string,
             notes: validated.notes
           }
-        }
+        },
+        userId
       },
       include: { fuelUsage: true }
     });

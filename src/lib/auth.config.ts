@@ -26,13 +26,11 @@ const authConfig = {
         const validateFields = LoginSchema.safeParse(credentials);
         if (validateFields.success) {
           const { username, password } = validateFields.data;
-          console.log('testing credentials');
-
-          console.log(username, password);
 
           const user = await prisma.user.findUnique({
             where: {
-              username
+              username,
+              active: true
             }
           });
 

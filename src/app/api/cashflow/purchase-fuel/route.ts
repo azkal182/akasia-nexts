@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { purchaseFuelSchema } from '@/actions/fuel';
 import { uploadNota } from '@/actions/keuangan';
+import { auth } from '@/lib/auth';
 
 interface PurchaseFuelBody {
   carId: string;
@@ -13,6 +14,7 @@ interface PurchaseFuelBody {
 }
 
 export async function POST(request: Request) {
+  const user = await auth();
   try {
     const formData = await request.formData();
 
@@ -115,7 +117,8 @@ export async function POST(request: Request) {
             receiptFile: receiptFileUrl,
             notes: body.notes
           }
-        }
+        },
+        userId: user!.user!.id! // Menyimpan ID pengguna yang melakukan transaksi
       },
       include: {
         fuelUsage: true

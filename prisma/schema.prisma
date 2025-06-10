@@ -20,10 +20,15 @@ model User {
     password String
     ROLE     UserRole @default(USER)
 
-    createdAt    DateTime      @default(now())
-    updatedAt    DateTime      @updatedAt
-    driving      Boolean       @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    driving   Boolean  @default(false)
+
     usageRecords UsageRecord[]
+    Transaction  Transaction[]
+    Cashflow     Cashflow[]
+
+    active Boolean? @default(true)
 }
 
 enum UserRole {
@@ -70,6 +75,9 @@ model Transaction {
     balance     Int
     income      Income?
     expense     Expense?
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
 
     timeStamp DateTime? @default(now())
 }
@@ -177,6 +185,8 @@ model Cashflow {
 
     income    CashIncome?
     fuelUsage FuelUsage?
+    userId    String
+    user      User        @relation(fields: [userId], references: [id])
 }
 
 enum CashflowType {
