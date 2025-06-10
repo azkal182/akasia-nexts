@@ -80,7 +80,13 @@ export type ReportItem = {
   receiptFile: string | null;
 };
 
-export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
+export default function CashflowPage({
+  cars,
+  role
+}: {
+  cars: CarResponse[];
+  role: string;
+}) {
   const [report, setReport] = useState<ReportItem[]>([]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -673,76 +679,77 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                 </Form>
               </DialogContent>
             </Dialog>
-            <ExportPdfButton data={report} />
+            {role === 'ADMIN' && <ExportPdfButton data={report} />}
           </div>
 
           {/* Tabel laporan */}
-          <Table className=''>
-            <TableHeader>
-              <TableRow className=''>
-                <TableHead>Tanggal</TableHead>
-                <TableHead>Deskripsi</TableHead>
-                <TableHead>Catatan</TableHead>
-                <TableHead className={'text-right'}>Pemasukan</TableHead>
-                <TableHead className={'text-right'}>Pengeluaran</TableHead>
-                <TableHead className={'text-right'}>Saldo</TableHead>
-                <TableHead className={'text-center'}>Nota</TableHead>
-                <TableHead className={'text-center'}>Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {report.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className='text-center p-4'>
-                    Tidak ada data
-                  </TableCell>
+          {role === 'ADMIN' && (
+            <Table className=''>
+              <TableHeader>
+                <TableRow className=''>
+                  <TableHead>Tanggal</TableHead>
+                  <TableHead>Deskripsi</TableHead>
+                  <TableHead>Catatan</TableHead>
+                  <TableHead className={'text-right'}>Pemasukan</TableHead>
+                  <TableHead className={'text-right'}>Pengeluaran</TableHead>
+                  <TableHead className={'text-right'}>Saldo</TableHead>
+                  <TableHead className={'text-center'}>Nota</TableHead>
+                  <TableHead className={'text-center'}>Aksi</TableHead>
                 </TableRow>
-              )}
+              </TableHeader>
+              <TableBody>
+                {report.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className='text-center p-4'>
+                      Tidak ada data
+                    </TableCell>
+                  </TableRow>
+                )}
 
-              {report.map(
-                ({
-                  id: idReport,
-                  date,
-                  description,
-                  credit,
-                  debit,
-                  runningBalance,
-                  notes,
-                  receiptFile
-                }) => (
-                  <TableRow key={idReport}>
-                    {/*<TableCell>{new Date(date).toLocaleDateString()}</TableCell>*/}
-                    <TableCell>
-                      {format(date, 'PPP', {
-                        locale: id
-                      })}
-                    </TableCell>
-                    <TableCell>{description}</TableCell>
-                    <TableCell>{notes}</TableCell>
-                    <TableCell className={'text-right text-nowrap'}>
-                      {credit ? toRupiah(credit) : '-'}
-                    </TableCell>
-                    <TableCell className={'text-right text-nowrap'}>
-                      {debit ? toRupiah(debit) : '-'}
-                    </TableCell>
-                    <TableCell className='text-right font-semibold text-nowrap'>
-                      {toRupiah(runningBalance)}
-                    </TableCell>
-                    <TableCell className='text-center'>
-                      {receiptFile ? (
-                        <Link
-                          className='underline text-primary'
-                          href={receiptFile}
-                          target='_blank'
-                        >
-                          Nota
-                        </Link>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                    <TableCell className='flex items-centern  space-x-2'>
-                      {/* <Button
+                {report.map(
+                  ({
+                    id: idReport,
+                    date,
+                    description,
+                    credit,
+                    debit,
+                    runningBalance,
+                    notes,
+                    receiptFile
+                  }) => (
+                    <TableRow key={idReport}>
+                      {/*<TableCell>{new Date(date).toLocaleDateString()}</TableCell>*/}
+                      <TableCell>
+                        {format(date, 'PPP', {
+                          locale: id
+                        })}
+                      </TableCell>
+                      <TableCell>{description}</TableCell>
+                      <TableCell>{notes}</TableCell>
+                      <TableCell className={'text-right text-nowrap'}>
+                        {credit ? toRupiah(credit) : '-'}
+                      </TableCell>
+                      <TableCell className={'text-right text-nowrap'}>
+                        {debit ? toRupiah(debit) : '-'}
+                      </TableCell>
+                      <TableCell className='text-right font-semibold text-nowrap'>
+                        {toRupiah(runningBalance)}
+                      </TableCell>
+                      <TableCell className='text-center'>
+                        {receiptFile ? (
+                          <Link
+                            className='underline text-primary'
+                            href={receiptFile}
+                            target='_blank'
+                          >
+                            Nota
+                          </Link>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell className='flex items-centern  space-x-2'>
+                        {/* <Button
                         size={'sm'}
                         onClick={() => {
                             if (credit) {
@@ -754,23 +761,24 @@ export default function CashflowPage({ cars }: { cars: CarResponse[] }) {
                       >
                         Edit
                       </Button> */}
-                      <DeleteButtonFuel
-                        idReport={idReport}
-                        onDeleted={async () => {
-                          toast.success('Data Berhasil Dihapus');
-                          const reportRes = await fetch(
-                            `/api/cashflow/report?year=${year}&month=${month}`
-                          ).then((r) => r.json());
+                        <DeleteButtonFuel
+                          idReport={idReport}
+                          onDeleted={async () => {
+                            toast.success('Data Berhasil Dihapus');
+                            const reportRes = await fetch(
+                              `/api/cashflow/report?year=${year}&month=${month}`
+                            ).then((r) => r.json());
 
-                          setReport(reportRes);
-                        }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                )
-              )}
-            </TableBody>
-          </Table>
+                            setReport(reportRes);
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

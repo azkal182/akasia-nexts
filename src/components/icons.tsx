@@ -38,12 +38,14 @@ import {
   Car,
   History,
   Fuel,
-  Users2
+  Users2,
+  Ampersands
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
 
 export const Icons = {
+  ampersands: Ampersands,
   users2: Users2,
   history: History,
   Car: Car,

@@ -58,3 +58,16 @@ export const activateUser = async (userId: string) => {
     throw new Error('Failed to activate user');
   }
 };
+export const deleteUserById = async (userId: string) => {
+  try {
+    const data = await prisma.user.delete({
+      where: { id: userId }
+    });
+
+    revalidatePath('/dashboard/users');
+    return data;
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw new Error('Failed to delete user');
+  }
+};

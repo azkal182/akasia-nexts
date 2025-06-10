@@ -95,7 +95,7 @@
 // export default UsersPageView;
 
 'use client';
-import { activateUser, UsersResponse } from '@/actions/users';
+import { activateUser, deleteUserById, UsersResponse } from '@/actions/users';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -133,27 +133,49 @@ interface UsersPageViewProps {
 }
 
 const UsersPageView = ({ users }: UsersPageViewProps) => {
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isActivateAlertOpen, setIsActivateAlertOpen] = useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UsersResponse | null>(null);
   const [isActivating, setIsActivating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleActivate = async (userId: string) => {
-    setSelectedUserId(userId);
-    setIsAlertOpen(true);
+  const handleActivate = async (user: UsersResponse) => {
+    setSelectedUser(user);
+    setIsActivateAlertOpen(true);
   };
 
   const confirmActivate = async () => {
-    if (!selectedUserId) return;
+    if (!selectedUser) return;
     setIsActivating(true);
     try {
-      await activateUser(selectedUserId);
+      await activateUser(selectedUser.id);
       toast.success('User activated successfully');
     } catch (error) {
       toast.error('Failed to activate user');
     } finally {
       setIsActivating(false);
-      setIsAlertOpen(false);
-      setSelectedUserId(null);
+      setIsActivateAlertOpen(false);
+      setSelectedUser(null);
+    }
+  };
+
+  const handleDelete = (user: UsersResponse) => {
+    setSelectedUser(user);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedUser) return;
+    setIsDeleting(true);
+    try {
+      await deleteUserById(selectedUser.id);
+      toast.success('User deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete user');
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteAlertOpen(false);
+      setSelectedUser(null);
     }
   };
 
@@ -203,7 +225,7 @@ const UsersPageView = ({ users }: UsersPageViewProps) => {
                       <DropdownMenuContent align='end'>
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                          onClick={() => handleActivate(user.id)}
+                          onClick={() => handleActivate(user)}
                           disabled={user.active || isActivating}
                         >
                           Aktivasi
@@ -211,7 +233,12 @@ const UsersPageView = ({ users }: UsersPageViewProps) => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>Edit</DropdownMenuItem>
                         <DropdownMenuItem>Reset Password</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(user)}
+                          className='text-red-600'
+                        >
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -221,13 +248,17 @@ const UsersPageView = ({ users }: UsersPageViewProps) => {
           </Table>
         </div>
       </CardContent>
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+      <AlertDialog
+        open={isActivateAlertOpen}
+        onOpenChange={setIsActivateAlertOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Aktivasi</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin mengaktifkan pengguna ini? Tindakan ini
-              tidak dapat dibatalkan.
+              Apakah Anda yakin ingin mengaktifkan pengguna{' '}
+              <span className='font-semibold'>{selectedUser?.name}</span> (
+              {selectedUser?.username})? Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -237,6 +268,28 @@ const UsersPageView = ({ users }: UsersPageViewProps) => {
               disabled={isActivating}
             >
               {isActivating ? 'Mengaktifkan...' : 'Aktifkan'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi Penghapusan</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus pengguna{' '}
+              <span className='font-semibold'>{selectedUser?.name}</span> (
+              {selectedUser?.username})? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className='bg-red-600 hover:bg-red-700'
+            >
+              {isDeleting ? 'Menghapus...' : 'Hapus'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

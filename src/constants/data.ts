@@ -60,7 +60,7 @@ export const navItemsDriver: NavItem[] = [
   {
     title: 'Perizinan',
     url: '/dashboard/perizinan',
-    icon: 'Car',
+    icon: 'ampersands',
     isActive: false,
     // shortcut: ["c", "c"],
     items: []
