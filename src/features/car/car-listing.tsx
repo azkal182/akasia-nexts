@@ -39,6 +39,7 @@ import { toast } from 'sonner';
 
 interface CarListingProps {
   cars: Car[];
+  addButton?: Boolean;
 }
 
 // Form validation schema
@@ -58,7 +59,7 @@ const formCarSchema = z.object({
 
 type FormCarInput = z.infer<typeof formCarSchema>;
 
-const CarListing = ({ cars }: CarListingProps) => {
+const CarListing = ({ cars, addButton = false }: CarListingProps) => {
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const session = useCurrentSession();
@@ -145,13 +146,15 @@ const CarListing = ({ cars }: CarListingProps) => {
 
   return (
     <div className='p-4'>
-      <span>{JSON.stringify(session.session)} sdsd</span>
       <Card className={'max-w-[calc(100vw-2rem)] md:max-w-full'}>
-        <CardHeader>
-          <div>
-            <Button>Tambah</Button>
-          </div>
-        </CardHeader>
+        {addButton && (
+          <CardHeader>
+            <div>
+              <Button>Tambah</Button>
+            </div>
+          </CardHeader>
+        )}
+
         <CardContent>
           <div>
             <Table>
