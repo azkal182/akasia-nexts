@@ -284,12 +284,12 @@ const ExportButton = ({
         { text: record.purpose, alignment: 'left' },
         { text: record.destination, alignment: 'left' },
         {
-          text: format(new Date(record.startTime), 'dd - HH:mm'),
+          text: format(new Date(record.startTime), 'dd/MM/yy - HH:mm'),
           alignment: 'center'
         },
         {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          text: format(new Date(record.endTime as any), 'dd - HH:mm'),
+          text: format(new Date(record.endTime as any), 'dd/MM/yy - HH:mm'),
           alignment: 'center'
         },
         { text: record.User?.name || '-', alignment: 'left' }

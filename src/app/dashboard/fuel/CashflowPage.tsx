@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/table';
 import { CalendarIcon, FuelIcon } from 'lucide-react';
 import { toRupiah } from '@/lib/rupiah';
-import { CarResponse } from '@/actions/car';
+import { CarResponse, getCarById } from '@/actions/car';
 import { objectToFormData } from '@/lib/objectToFormData';
 import {
   FormControl,
@@ -94,7 +94,7 @@ export default function CashflowPage({
   const [filename, setFilename] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isPending, startTransition] = useTransition();
-
+  const [selectedCar, setSelectedCar] = useState<CarResponse | null>(null);
   const [openIncome, setOpenIncome] = useState(false);
   const [openFuel, setOpenFuel] = useState(false);
   const inputAmountRef = useRef<HTMLInputElement>(null);
@@ -123,6 +123,11 @@ export default function CashflowPage({
       amount: 0
     }
   });
+
+  const handleSelectedCar = async (id) => {
+    const data = await getCarById(id);
+    setSelectedCar(data);
+  };
 
   const isLoading =
     isPending ||
@@ -491,7 +496,12 @@ export default function CashflowPage({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Armada</FormLabel>
-                          <Select onValueChange={field.onChange}>
+                          <Select
+                            onValueChange={(value) => {
+                              console.log('Selected carId:', value);
+                              handleSelectedCar(value);
+                            }}
+                          >
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder='Pilih Armada' />
@@ -506,9 +516,15 @@ export default function CashflowPage({
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                          <Link target='_blank' href={'/barcode/testing'}>
-                            barcode
-                          </Link>
+                          {selectedCar && selectedCar.barcodeString && (
+                            <Link
+                              className='underline text-primary pt-2'
+                              target='_blank'
+                              href={`/barcode/${selectedCar.barcodeString}`}
+                            >
+                              Klik Untuk Melihat Barcode
+                            </Link>
+                          )}
                         </FormItem>
                       )}
                     />
