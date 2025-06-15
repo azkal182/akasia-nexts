@@ -1,34 +1,34 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
 // import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import { useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { LoginSchema, LoginSchemaInput } from "@/schemas/login";
-import { Login } from "@/actions/login";
+import { useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { LoginSchema, LoginSchemaInput } from '@/schemas/login';
+import { Login } from '@/actions/login';
 
 export default function UserAuthForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = searchParams.get('callbackUrl');
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<LoginSchemaInput>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      username: "admin",
-      password: "admin",
-    },
+      username: '',
+      password: ''
+    }
   });
 
   const onSubmit = (values: LoginSchemaInput) => {
@@ -43,7 +43,7 @@ export default function UserAuthForm() {
         if (data?.error) {
           toast.error(data?.error);
         } else {
-          toast.success("Signed In Successfully!");
+          toast.success('Signed In Successfully!');
         }
       });
     });
@@ -54,17 +54,17 @@ export default function UserAuthForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className='w-full space-y-2'>
         <FormField
           control={form.control}
-          name="username"
+          name='username'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input
-                  type="text"
-                  placeholder="Enter your Username..."
+                  type='text'
+                  placeholder='Enter your Username...'
                   disabled={isLoading}
                   {...field}
                 />
@@ -75,14 +75,14 @@ export default function UserAuthForm() {
         />
         <FormField
           control={form.control}
-          name="password"
+          name='password'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input
-                  type="password"
-                  placeholder="Enter your password..."
+                  type='password'
+                  placeholder='Enter your password...'
                   disabled={isLoading}
                   {...field}
                 />
@@ -91,8 +91,8 @@ export default function UserAuthForm() {
             </FormItem>
           )}
         />
-        <Button disabled={isLoading} className="ml-auto w-full" type="submit">
-          {isLoading ? "Processing..." : "Login"}
+        <Button disabled={isLoading} className='ml-auto w-full' type='submit'>
+          {isLoading ? 'Processing...' : 'Login'}
         </Button>
       </form>
     </Form>
