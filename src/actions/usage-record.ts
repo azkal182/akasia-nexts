@@ -1,3 +1,4 @@
+'use server';
 import prisma from '@/lib/prisma';
 import { UsageStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -20,6 +21,7 @@ export const getRecords = async (status?: string) => {
       }
     });
 
+    console.log(JSON.stringify(usageRecords.slice(0, 1)));
     return usageRecords;
   } catch (error) {
     console.error('Error fetching usage records:', error);

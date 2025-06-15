@@ -65,6 +65,7 @@ export default function UserAuthForm() {
                 <Input
                   type='text'
                   placeholder='Enter your Username...'
+                  autoComplete='off'
                   disabled={isLoading}
                   {...field}
                 />
@@ -84,6 +85,7 @@ export default function UserAuthForm() {
                   type='password'
                   placeholder='Enter your password...'
                   disabled={isLoading}
+                  autoComplete='off'
                   {...field}
                 />
               </FormControl>

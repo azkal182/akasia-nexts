@@ -115,20 +115,6 @@ export default function CashflowPage({
       amount: 0
     }
   });
-  // --- Form react-hook-form for fuel purchase ---
-  // const {
-  //     register: registerFuel,
-  //     handleSubmit: handleSubmitFuel,
-  //     reset: resetFuel,
-  //     control: controlFuel,
-  //     formState: { errors: errorsFuel },
-  // } = useForm<PurchaseFuelFormInput>({
-  //     resolver: zodResolver(purchaseFuelSchema),
-  //     defaultValues: {
-  //         fuelType: FuelType.BENSIN,
-  //         receiptFile: undefined,
-  //     },
-  // });
   const formFuel = useForm<PurchaseFuelFormInput>({
     resolver: zodResolver(purchaseFuelSchema),
     defaultValues: {
@@ -520,6 +506,9 @@ export default function CashflowPage({
                             </SelectContent>
                           </Select>
                           <FormMessage />
+                          <Link target='_blank' href={'/barcode/testing'}>
+                            barcode
+                          </Link>
                         </FormItem>
                       )}
                     />

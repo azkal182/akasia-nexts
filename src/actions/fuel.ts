@@ -163,7 +163,7 @@ export async function getMonthlyReport(data: unknown): Promise<ReportItem[]> {
   return report;
 }
 
-function getLocalDate(year: number, month: number, day: number): Date {
+export function getLocalDate(year: number, month: number, day: number): Date {
   const utcDate = new Date(Date.UTC(year, month, day));
   // geser +7 jam ke depan
   utcDate.setUTCHours(utcDate.getUTCHours() - 7);

@@ -359,7 +359,7 @@ import { useForm } from 'react-hook-form';
 import { useCurrentSession } from '@/hooks/use-current-user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { CarIcon } from 'lucide-react';
+import { CarIcon, InfoIcon } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -377,6 +377,7 @@ interface CarListingProps {
   cars: CarResponse[];
   addButton?: boolean;
   goButton?: boolean;
+  status?: boolean;
   onGo?: () => void;
 }
 
@@ -401,6 +402,7 @@ const CarListing = ({
   cars,
   addButton = false,
   goButton = false,
+  status = false,
   onGo
 }: CarListingProps) => {
   const [selectedCar, setSelectedCar] = useState<CarResponse | null>(null);
@@ -522,7 +524,7 @@ const CarListing = ({
                   <TableHead>Nama</TableHead>
                   {goButton && <TableHead>Berangkat</TableHead>}
                   <TableHead>Plat</TableHead>
-                  <TableHead>Tersedia</TableHead>
+                  {status && <TableHead>Tersedia</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -538,31 +540,34 @@ const CarListing = ({
                             size='sm'
                             variant='outline'
                           >
-                            <CarIcon /> Berangkat
+                            <CarIcon /> Go
                           </Button>
                         ) : (
                           <Button
                             size='sm'
-                            variant='secondary'
+                            variant='outline'
                             onClick={() => openInfoDialog(car)}
                           >
-                            Info
+                            <InfoIcon />
+                            STUT ON GOING
                           </Button>
                         )}
                       </TableCell>
                     )}
                     <TableCell>{car.licensePlate}</TableCell>
-                    <TableCell>
-                      {car.status === 'AVAILABLE' ? (
-                        <span className='inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800'>
-                          READY
-                        </span>
-                      ) : (
-                        <span className='inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800'>
-                          STUT ONGOING
-                        </span>
-                      )}
-                    </TableCell>
+                    {status && (
+                      <TableCell>
+                        {car.status === 'AVAILABLE' ? (
+                          <span className='inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800'>
+                            READY
+                          </span>
+                        ) : (
+                          <span className='inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800'>
+                            STUT ONGOING
+                          </span>
+                        )}
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

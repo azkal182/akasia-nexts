@@ -67,15 +67,19 @@ export default function DriverTripCard({
 
         {currentStatus.status === 'ONGOING' && (
           //   <Button onClick={() => onComplete(currentStatus.id)}>Selesai</Button>
-          <ConfirmDialog
-            title='Konfirmasi Selesai Perjalanan'
-            description={`Apakah Perjalanan ke ${currentStatus.destination} keperluan ${currentStatus.purpose} sudah selesai?`}
-            data={currentStatus}
-            onSubmit={(data) =>
-              onComplete({ id: data!.id, userId: data!.userId! })
-            }
-            trigger={<Button>Selesai</Button>}
-          />
+
+          <div className='flex items-center justify-between'>
+            <ConfirmDialog
+              title='Konfirmasi Selesai Perjalanan'
+              description={`Apakah Perjalanan ke ${currentStatus.destination} keperluan ${currentStatus.purpose} sudah selesai?`}
+              data={currentStatus}
+              onSubmit={(data) =>
+                onComplete({ id: data!.id, userId: data!.userId! })
+              }
+              trigger={<Button>Selesai</Button>}
+            />
+            <Button>Barcode</Button>
+          </div>
         )}
       </CardContent>
     </Card>

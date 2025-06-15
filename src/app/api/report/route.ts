@@ -2,7 +2,7 @@
 // import pdfMake from "pdfmake/build/pdfmake";
 // import pdfFonts from "pdfmake/build/vfs_fonts";
 
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 // pdfMake.vfs = pdfFonts.vfs
 
@@ -250,7 +250,7 @@ import { NextResponse } from "next/server";
 //     // });
 // }
 
-import prisma from "@/lib/prisma";
+import prisma from '@/lib/prisma';
 
 async function getMonthlyCarExpensesPrisma(month: number, year: number) {
   const startDate = new Date(year, month - 1, 1);
@@ -258,7 +258,7 @@ async function getMonthlyCarExpensesPrisma(month: number, year: number) {
 
   // Dapatkan semua mobil
   const cars = await prisma.car.findMany({
-    select: { id: true, name: true, licensePlate: true },
+    select: { id: true, name: true, licensePlate: true }
   });
 
   // Hitung pengeluaran per mobil
@@ -268,11 +268,11 @@ async function getMonthlyCarExpensesPrisma(month: number, year: number) {
         where: {
           armada: { equals: car.name.trim() },
           expense: {
-            date: { gte: startDate, lte: endDate },
-          },
+            date: { gte: startDate, lte: endDate }
+          }
         },
         _sum: { total: true },
-        _count: true,
+        _count: true
       });
 
       console.log(car.name.trim());
@@ -282,7 +282,7 @@ async function getMonthlyCarExpensesPrisma(month: number, year: number) {
         carName: car.name,
         licensePlate: car.licensePlate,
         totalExpenses: expenses._sum.total || 0,
-        transactionCount: expenses._count,
+        transactionCount: expenses._count
       };
     })
   );
@@ -300,6 +300,6 @@ export async function GET() {
   //         }
   //     }
   //   });
-  const data = await getMonthlyCarExpensesPrisma(1, 2025);
+  const data = await getMonthlyCarExpensesPrisma(6, 2025);
   return NextResponse.json({ data });
 }

@@ -8,6 +8,7 @@ import NextTopLoader from 'nextjs-toploader';
 import Providers from '@/components/layout/providers';
 import { auth } from '@/lib/auth';
 import RefreshButton from '@/components/refresh-button';
+import Head from 'next/head';
 // import Link from "next/link";
 
 // const geistSans = Geist({
@@ -50,6 +51,10 @@ export default async function RootLayout({
       // className={`${lato.className}`}
       suppressHydrationWarning
     >
+      <Head>
+        <meta name='googlebot' content='notranslate' />
+        <meta name='google' content='notranslate' />
+      </Head>
       <body className={'overflow-hidden'}>
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
