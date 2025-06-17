@@ -498,7 +498,8 @@ export default function CashflowPage({
                           <FormLabel>Armada</FormLabel>
                           <Select
                             onValueChange={(value) => {
-                              console.log('Selected carId:', value);
+                              field.onChange(value);
+                              //   console.log('Selected carId:', value);
                               handleSelectedCar(value);
                             }}
                           >
