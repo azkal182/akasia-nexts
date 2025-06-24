@@ -1,5 +1,6 @@
 import { SearchParams } from 'nuqs/server';
 import ProfileViewPage from '@/features/profile/components/profile-view-page';
+import QRCodeScanner from '@/components/qrcodeScanner';
 
 type pageProps = {
   searchParams: Promise<SearchParams>;
@@ -10,5 +11,5 @@ export const metadata = {
 };
 
 export default async function Page({ searchParams }: pageProps) {
-  return <ProfileViewPage />;
+  return <QRCodeScanner />;
 }

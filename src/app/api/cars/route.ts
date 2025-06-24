@@ -18,9 +18,15 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log(JSON.stringify(body, null, 2));
+    await prisma.car.createMany({
+      data: {
+        name: body.name,
+        barcodeString: body.barcodeString
+      }
+    });
     return NextResponse.json(body);
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { message: 'Terjadi kesalahan', error },
       { status: 500 }

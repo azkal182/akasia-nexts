@@ -372,6 +372,8 @@ import { CalendarField } from '@/components/calendarField';
 import { toast } from 'sonner';
 import { CarResponse } from '@/actions/car';
 import { format } from 'date-fns';
+import { CreateCarSchema, CreateCarSchemaInput } from '@/schemas/cars';
+import QRCodeScanner from '@/components/qrcodeScanner';
 
 interface CarListingProps {
   cars: CarResponse[];
@@ -379,6 +381,7 @@ interface CarListingProps {
   goButton?: boolean;
   status?: boolean;
   onGo?: () => void;
+  onComplete?: ({ id, userId }: { id: string; userId: string }) => void;
 }
 
 // Form validation schema
@@ -389,25 +392,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const formCarSchema = z.object({
-  name: z.string().min(1, 'Nama Harus di isi'),
-  licensePlate: z.string().min(1, 'Plat Nomor wajib diisi'),
-  taxAnnual: z.date(),
-  fiveYear: z.date()
-});
-
-type FormCarInput = z.infer<typeof formCarSchema>;
-
 const CarListing = ({
   cars,
   addButton = false,
   goButton = false,
   status = false,
-  onGo
+  onGo,
+  onComplete
 }: CarListingProps) => {
   const [selectedCar, setSelectedCar] = useState<CarResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
+  const [addCarDialog, setAddCarDialog] = useState(false);
   const session = useCurrentSession();
 
   const {
@@ -423,11 +419,12 @@ const CarListing = ({
     }
   });
 
-  const formCar = useForm<FormCarInput>({
-    resolver: zodResolver(formCarSchema),
+  const formCar = useForm<CreateCarSchemaInput>({
+    resolver: zodResolver(CreateCarSchema),
     defaultValues: {
       name: '',
-      licensePlate: ''
+      licensePlate: '',
+      barcodeString: ''
     }
   });
 
@@ -485,7 +482,7 @@ const CarListing = ({
     }
   };
 
-  const handleSubmitCar = async (data: FormCarInput) => {
+  const handleSubmitCar = async (data: CreateCarSchemaInput) => {
     try {
       const res = await fetch('/api/cars', {
         method: 'POST',
@@ -504,16 +501,43 @@ const CarListing = ({
     }
   };
 
+  //   const onComplete = async (data: { id: string; userId: string }) => {
+  //     try {
+  //       const response = await fetch(`/api/usage-records/${data.id}`, {
+  //         method: 'PATCH',
+  //         headers: {
+  //           'Content-Type': 'application/json'
+  //         },
+  //         body: JSON.stringify({
+  //           endTime: new Date().toISOString(),
+  //           userId: data.userId
+  //         })
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error('Gagal menyelesaikan perjalanan');
+  //       }
+
+  //       closeInfoDialog();
+  //       toast.success('Perjalanan selesai');
+  //       window.location.reload();
+  //       //   fetchCars();
+  //     } catch (error) {
+  //       console.error('Error completing trip:', error);
+  //       toast.error('Gagal menyelesaikan perjalanan');
+  //     }
+  //   };
+
   return (
     <div>
       <Card className='max-w-[calc(100vw-2rem)] md:max-w-full'>
-        {addButton && (
+        {/* {addButton && (
           <CardHeader>
             <div>
-              <Button>Tambah</Button>
+              <Button onClick={() => setAddCarDialog(true)}>Tambah</Button>
             </div>
           </CardHeader>
-        )}
+        )} */}
 
         <CardContent>
           <div>
@@ -576,7 +600,7 @@ const CarListing = ({
         </CardContent>
       </Card>
 
-      <Dialog open={false}>
+      <Dialog open={addCarDialog} onOpenChange={() => setAddCarDialog(false)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tambah Mobil</DialogTitle>
@@ -599,7 +623,7 @@ const CarListing = ({
                 />
                 <FormField
                   control={formCar.control}
-                  name='licensePlate'
+                  name='barcodeString'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Plat Nomor</FormLabel>
@@ -607,10 +631,11 @@ const CarListing = ({
                         <Input {...field} />
                       </FormControl>
                       <FormMessage />
+                      <QRCodeScanner onScanned={(val) => field.onChange(val)} />
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={formCar.control}
                   name='taxAnnual'
                   render={({ field }) => (
@@ -623,7 +648,7 @@ const CarListing = ({
                   render={({ field }) => (
                     <CalendarField field={field} label='Pajak 5 Tahunan' />
                   )}
-                />
+                /> */}
                 <DialogFooter className='mt-2'>
                   <Button>Simpan</Button>
                 </DialogFooter>
@@ -740,6 +765,24 @@ const CarListing = ({
             <Button type='button' onClick={closeInfoDialog}>
               Tutup
             </Button>
+            {session.session?.user.role === 'ADMIN' && (
+              <Button
+                type='button'
+                onClick={() => {
+                  closeInfoDialog();
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore
+                  onComplete({
+                    userId: selectedCar!.usageRecords[0]!.User!.id as string,
+                    id: selectedCar!.usageRecords[0]!.id as string
+                  });
+
+                  // alert(selectedCar!.usageRecords);
+                }}
+              >
+                Selesai
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

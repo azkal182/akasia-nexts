@@ -51,6 +51,7 @@ const DriverModePage = ({
                 onGo();
               }
             }}
+            onComplete={onComplete}
           />
         </div>
       </div>

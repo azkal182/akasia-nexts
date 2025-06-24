@@ -65,6 +65,8 @@ export async function PATCH(
       where: { id }
     });
 
+    console.log(JSON.stringify(usageRecord, null, 2));
+
     if (!usageRecord || usageRecord.status !== 'ONGOING') {
       return NextResponse.json(
         { message: 'Tidak ditemukan penggunaan yang sedang berlangsung' },
