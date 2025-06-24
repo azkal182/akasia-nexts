@@ -49,7 +49,9 @@ export default function QRCodeScanner({
     try {
       const result = await scanner.scanFile(file, true);
       //   setQrText(result);
-      onScanned(result);
+      if (onScanned) {
+        onScanned(result);
+      }
       toast.success('✅ QR berhasil dibaca dari gambar!');
     } catch (err) {
       toast.error('❌ Gagal membaca QR dari gambar.');
