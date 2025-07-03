@@ -1,32 +1,43 @@
-"use server";
-import prisma from "@/lib/prisma";
-import { fromZonedTime } from "date-fns-tz";
+'use server';
+import prisma from '@/lib/prisma';
+import { fromZonedTime } from 'date-fns-tz';
 
 export const getReportData = async ({
   startDate,
   endDate,
-  timeZone,
+  timeZone
 }: {
   startDate: Date;
   endDate: Date;
   timeZone: string;
 }) => {
+  //   const offsetMs = 7 * 60 * 60 * 1000;
+  //   const utcStartDate = new Date(startDate.getTime() - offsetMs);
+  //   const utcEndDate = new Date(endDate.getTime() - offsetMs);
+
+  //   console.log('Local Jakarta (WIB):', startDate, endDate);
+  //   console.log('UTC:', utcStartDate, utcEndDate);
   const offsetMs = 7 * 60 * 60 * 1000;
+
+  // Mengubah endDate menjadi jam 23:59 WIB
+  endDate.setHours(23, 59, 59, 999); // Set ke 23:59:59.999 WIB
+
+  // Konversi startDate dan endDate ke UTC
   const utcStartDate = new Date(startDate.getTime() - offsetMs);
   const utcEndDate = new Date(endDate.getTime() - offsetMs);
 
-  console.log("Local Jakarta (WIB):", startDate, endDate);
-  console.log("UTC:", utcStartDate, utcEndDate);
+  console.log('Local Jakarta (WIB):', startDate, endDate);
+  console.log('UTC:', utcStartDate, utcEndDate);
 
   const transactionsWithItems = await prisma.transaction.findMany({
     where: {
       date: {
         gte: utcStartDate,
-        lte: utcEndDate,
-      },
+        lte: utcEndDate
+      }
     },
     orderBy: [
-      { date: "asc" },
+      { date: 'asc' }
       // { timeStamp: 'asc' }
     ],
     include: {
@@ -38,37 +49,37 @@ export const getReportData = async ({
               description: true,
               armada: true,
               quantity: true,
-              total: true,
-            },
-          },
-        },
+              total: true
+            }
+          }
+        }
       },
       income: {
         // Tambahkan ini agar income bisa diakses
         select: {
-          amount: true,
-        },
-      },
-    },
+          amount: true
+        }
+      }
+    }
   });
 
   const previousBalance = await prisma.transaction.aggregate({
     _sum: {
       debit: true, // Total pengeluaran (expense)
-      credit: true, // Total pemasukan (income)
+      credit: true // Total pemasukan (income)
     },
     where: {
       date: {
-        lt: utcStartDate, // Ambil semua transaksi SEBELUM `startDate`
-      },
-    },
+        lt: utcStartDate // Ambil semua transaksi SEBELUM `startDate`
+      }
+    }
   });
 
   // Saldo awal dihitung dari total pemasukan - total pengeluaran sebelum `startDate`
   let runningBalance =
     (previousBalance._sum.credit || 0) - (previousBalance._sum.debit || 0);
-  console.log("Saldo Awal:", runningBalance);
-  console.log("Running Balance Before Processing:", runningBalance);
+  console.log('Saldo Awal:', runningBalance);
+  console.log('Running Balance Before Processing:', runningBalance);
 
   // let runningBalance = 0; // Untuk menyimpan saldo yang diperbarui
   // Format data agar setiap item memiliki informasi transaksi
@@ -87,7 +98,7 @@ export const getReportData = async ({
           transactionId: transaction.id,
           date: transaction.date,
           transactionDescription: transaction.description,
-          type: "expense",
+          type: 'expense',
           debit: item.total,
           credit: null,
           balance: runningBalance, // Balance diperbarui setelah setiap item
@@ -97,7 +108,7 @@ export const getReportData = async ({
           total: item.total,
           totalNota: transaction.debit,
           notaPath: transaction.expense?.notaFilePath,
-          armada: item.armada ?? null,
+          armada: item.armada ?? null
         };
       });
     }
@@ -108,7 +119,7 @@ export const getReportData = async ({
         transactionId: transaction.id,
         date: transaction.date,
         transactionDescription: transaction.description,
-        type: "income",
+        type: 'income',
         debit: transaction.debit,
         credit: transaction.credit,
         balance: runningBalance, // Gunakan balance yang sudah diperbarui sebelumnya
@@ -116,7 +127,7 @@ export const getReportData = async ({
         itemDescription: null,
         quantity: null,
         total: transaction.income?.amount ?? 0,
-        armada: null,
+        armada: null
       })
     );
     return [
@@ -124,7 +135,7 @@ export const getReportData = async ({
         transactionId: transaction.id,
         date: transaction.date,
         transactionDescription: transaction.description,
-        type: "income",
+        type: 'income',
         debit: transaction.debit,
         credit: transaction.credit,
         balance: runningBalance, // Gunakan balance yang sudah diperbarui sebelumnya
@@ -132,8 +143,8 @@ export const getReportData = async ({
         itemDescription: null,
         quantity: null,
         total: transaction.income?.amount ?? 0,
-        armada: null,
-      },
+        armada: null
+      }
     ];
   });
 
@@ -142,6 +153,6 @@ export const getReportData = async ({
   return {
     previousBalance:
       (previousBalance._sum.credit || 0) - (previousBalance._sum.debit || 0),
-    data: formattedData,
+    data: formattedData
   };
 };
