@@ -6,7 +6,10 @@ import { format } from 'date-fns';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { id } from 'date-fns/locale';
-import moment from 'moment-hijri';
+import moment from 'moment-hijri'; // Import moment-hijri
+
+// Atur lokal untuk nama bulan dalam Bahasa Indonesia
+moment.locale('id');
 pdfMake.vfs = pdfFonts.vfs;
 
 const ExportButton = ({

@@ -9,7 +9,10 @@ import { getReportData } from '@/actions/report';
 import MonthYearSelect from '@/components/month-year-select';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import moment from 'moment-hijri';
+import moment from 'moment-hijri'; // Import moment-hijri
+
+// Atur lokal untuk nama bulan dalam Bahasa Indonesia
+moment.locale('id');
 
 import {
   Dialog,
