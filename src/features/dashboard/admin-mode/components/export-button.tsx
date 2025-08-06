@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { id } from 'date-fns/locale';
+import moment from 'moment-hijri';
 pdfMake.vfs = pdfFonts.vfs;
 
 const ExportButton = ({
@@ -85,7 +86,7 @@ const ExportButton = ({
             { text: 'Saldo', bold: true }
           ],
           ...transactions.data.map((t) => [
-            format(t.date, 'dd-MM-yyyy'),
+            moment(t.date).format('iDD-iMM-iYYYY'),
             t.itemDescription ? t.itemDescription : t.transactionDescription,
             t.armada || '-',
             t.credit ? t.credit.toLocaleString() : '-',
@@ -116,7 +117,7 @@ const ExportButton = ({
         margin: [0, 10, 0, 0]
       },
       {
-        text: format(new Date(date.startDate), 'MMMM yyyy', { locale: id }),
+        text: moment(date.startDate).format('iMMMM iYYYY'),
         style: 'header',
         alignment: 'center',
         margin: [0, 5, 0, 20]
@@ -145,7 +146,7 @@ const ExportButton = ({
 
       const pageContent = [
         {
-          text: `Tanggal: ${new Date(nota1.date).toLocaleDateString()}`,
+          text: `Tanggal: ${new Date(nota1.date).toLocaleDateString()} - ${moment(nota1.date).format('iD iMMMM iYYYY')}`,
           bold: true,
           margin: [0, 10, 0, 5],
           alignment: 'center'
@@ -229,7 +230,7 @@ const ExportButton = ({
     // const pdfDoc = pdfMake.createPdf(docDefinition);
     const pdfDoc = pdfMake.createPdf(docDefinition);
     pdfDoc.download(
-      `laporan-${format(date.startDate, 'MMMM-yyyy', { locale: id })}.pdf`
+      `laporan-${moment(date.startDate).format('iMMMM iYYYY')}.pdf`
     );
     setLoading(false);
   };

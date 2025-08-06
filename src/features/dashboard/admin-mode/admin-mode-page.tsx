@@ -9,6 +9,8 @@ import { getReportData } from '@/actions/report';
 import MonthYearSelect from '@/components/month-year-select';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
+import moment from 'moment-hijri';
+
 import {
   Dialog,
   DialogTrigger,
@@ -134,6 +136,7 @@ const AdminModePage = () => {
                   <TableRow>
                     <TableHead>No</TableHead>
                     <TableHead>Tanggal</TableHead>
+                    <TableHead>Hijriyah</TableHead>
                     <TableHead>Keterangan</TableHead>
                     <TableHead>Armada</TableHead>
                     <TableHead>Pemasukan</TableHead>
@@ -156,6 +159,9 @@ const AdminModePage = () => {
                         <TableCell>{index + 1}</TableCell>
                         <TableCell>
                           {format(item.date, 'PPP', { locale: id })}
+                        </TableCell>
+                        <TableCell>
+                          {moment(item.date).format('iD iMMMM iYYYY')}
                         </TableCell>
                         <TableCell>
                           {item.transactionDescription
