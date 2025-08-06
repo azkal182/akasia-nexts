@@ -130,6 +130,22 @@ import moment from 'moment-hijri'; // Import moment-hijri
 
 // Atur lokal untuk nama bulan dalam Bahasa Indonesia
 moment.locale('id');
+moment.updateLocale('id', {
+  iMonths: [
+    'Muharram',
+    'Safar',
+    'Rabiul Awal',
+    'Rabiul Akhir',
+    'Jumadil Awal',
+    'Jumadil Akhir',
+    'Rajab',
+    'Syaban',
+    'Ramadhan',
+    'Syawal',
+    'Zulkaidah',
+    'Zulhijah'
+  ]
+});
 
 type MonthOption = {
   label: string;
