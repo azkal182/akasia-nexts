@@ -147,7 +147,7 @@ export default function MonthYearSelect({ searchParams }: Props) {
   const generateHijriMonthOptions = (): MonthOption[] => {
     const options: MonthOption[] = [];
     const startDateLimit = moment('2025-01-01'); // Batas awal Masehi
-    let current = moment(); // Mulai dari hari ini
+    const current = moment(); // Mulai dari hari ini
 
     // Iterasi mundur dari bulan ini hingga mencapai batas awal
     while (current.isAfter(startDateLimit)) {
