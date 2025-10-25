@@ -1,6 +1,12 @@
 'use client';
-
-import React, { useState, useEffect, useRef, useTransition } from 'react';
+import moment from 'moment-hijri';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useTransition,
+  useMemo
+} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -66,6 +72,38 @@ import { DeleteButtonFuel } from '@/components/deleteButtonFuel';
 import { useRouter } from 'next/navigation';
 import ExportPdfButton from './exportPdfButton';
 
+moment.locale('id');
+moment.updateLocale('id', {
+  iMonths: [
+    'Muharram',
+    'Safar',
+    'Rabiul Awal',
+    'Rabiul Akhir',
+    'Jumadil Awal',
+    'Jumadil Akhir',
+    'Rajab',
+    'Syaban',
+    'Ramadhan',
+    'Syawal',
+    'Zulkaidah',
+    'Zulhijah'
+  ]
+});
+const hijriMonths = [
+  { value: 1, label: 'Muharram' },
+  { value: 2, label: 'Safar' },
+  { value: 3, label: 'Rabiul Awal' },
+  { value: 4, label: 'Rabiul Akhir' },
+  { value: 5, label: 'Jumadil Awal' },
+  { value: 6, label: 'Jumadil Akhir' },
+  { value: 7, label: 'Rajab' },
+  { value: 8, label: 'Syaban' },
+  { value: 9, label: 'Ramadhan' },
+  { value: 10, label: 'Syawal' },
+  { value: 11, label: 'Zulkaidah' },
+  { value: 12, label: 'Zulhijah' }
+];
+
 type IncomeFormInput = z.infer<typeof receiveIncomeSchema>;
 type PurchaseFuelFormInput = z.infer<typeof purchaseFuelSchema>;
 
@@ -104,6 +142,17 @@ export default function CashflowPage({
   const [selectedFuel, setSelectedFuel] =
     useState<PurchaseFuelFormInput | null>(null);
 
+  // Inisialisasi dari tanggal hari ini (Hijriyah)
+  const [hijriYear, setHijriYear] = useState(() => moment().iYear());
+  const [hijriMonth, setHijriMonth] = useState(() => moment().iMonth() + 1);
+
+  // Rentang tahun Hijriyah yang ditampilkan (sesuaikan kebutuhan)
+  const hijriYears = useMemo(() => {
+    const now = moment().iYear();
+    // contoh: tampilkan 1445..1448
+    return Array.from({ length: 4 }, (_, i) => now - 1 + i);
+  }, []);
+
   const handleFocus = () => {
     inputAmountRef.current?.select();
   };
@@ -138,12 +187,12 @@ export default function CashflowPage({
   useEffect(() => {
     async function fetchReport() {
       const data = await fetch(
-        `/api/cashflow/report?year=${year}&month=${month}`
+        `/api/cashflow/report?year=${hijriYear}&month=${hijriMonth}`
       ).then((res) => res.json());
       setReport(data);
     }
     fetchReport();
-  }, [year, month]);
+  }, [hijriYear, hijriMonth]);
 
   // Submit handler income
   async function onSubmitIncome(data: IncomeFormInput) {
@@ -277,7 +326,7 @@ export default function CashflowPage({
       <Card className={'max-w-[calc(100vw-2rem)] md:max-w-full'}>
         <CardContent className={'pt-6'}>
           <div className='flex flex-col md:flex-row gap-4 mb-6'>
-            <Select
+            {/* <Select
               value={year.toString()}
               onValueChange={(value) => setYear(parseInt(value))}
             >
@@ -302,6 +351,39 @@ export default function CashflowPage({
               </SelectTrigger>
               <SelectContent>
                 {months.map((m) => (
+                  <SelectItem key={m.value} value={m.value.toString()}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select> */}
+            {/* Year (Hijriyah) */}
+            <Select
+              value={hijriYear.toString()}
+              onValueChange={(value) => setHijriYear(parseInt(value))}
+            >
+              <SelectTrigger className='w-full md:w-[120px]'>
+                <SelectValue placeholder='Tahun (H)' />
+              </SelectTrigger>
+              <SelectContent>
+                {hijriYears.map((y) => (
+                  <SelectItem key={y} value={y.toString()}>
+                    {y} H
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Month (Hijriyah) */}
+            <Select
+              value={hijriMonth.toString()}
+              onValueChange={(value) => setHijriMonth(parseInt(value))}
+            >
+              <SelectTrigger className='w-full md:w-[180px]'>
+                <SelectValue placeholder='Bulan (Hijriyah)' />
+              </SelectTrigger>
+              <SelectContent>
+                {hijriMonths.map((m) => (
                   <SelectItem key={m.value} value={m.value.toString()}>
                     {m.label}
                   </SelectItem>
@@ -694,6 +776,7 @@ export default function CashflowPage({
               <TableHeader>
                 <TableRow className=''>
                   <TableHead>Tanggal</TableHead>
+                  <TableHead>Hijriyah</TableHead>
                   <TableHead>Deskripsi</TableHead>
                   <TableHead>Catatan</TableHead>
                   <TableHead className={'text-right'}>Pemasukan</TableHead>
@@ -712,7 +795,7 @@ export default function CashflowPage({
                   </TableRow>
                 )}
 
-                {report.map(
+                {report?.map(
                   ({
                     id: idReport,
                     date,
@@ -724,11 +807,13 @@ export default function CashflowPage({
                     receiptFile
                   }) => (
                     <TableRow key={idReport}>
-                      {/*<TableCell>{new Date(date).toLocaleDateString()}</TableCell>*/}
                       <TableCell>
                         {format(date, 'PPP', {
                           locale: id
                         })}
+                      </TableCell>
+                      <TableCell>
+                        {moment(date).format('iD iMMMM iYYYY')}
                       </TableCell>
                       <TableCell>{description}</TableCell>
                       <TableCell>{notes}</TableCell>
@@ -755,18 +840,6 @@ export default function CashflowPage({
                         )}
                       </TableCell>
                       <TableCell className='flex items-centern  space-x-2'>
-                        {/* <Button
-                        size={'sm'}
-                        onClick={() => {
-                            if (credit) {
-                              alert('pemasukan');
-                            } else {
-                              alert('pengeluaran');
-                            }
-                        }}
-                      >
-                        Edit
-                      </Button> */}
                         <DeleteButtonFuel
                           idReport={idReport}
                           onDeleted={async () => {

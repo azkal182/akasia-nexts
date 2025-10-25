@@ -1,3 +1,4 @@
+import moment from 'moment-hijri';
 import { CashflowType, FuelType } from '@prisma/client';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
@@ -5,6 +6,11 @@ import prisma from '@/lib/prisma';
 // ---------------------
 // Zod Schema untuk validasi input
 // ---------------------
+
+export const getHijriMonthlyReportSchema = z.object({
+  hijriYear: z.number().int().min(1300), // sesuaikan batasan
+  hijriMonth: z.number().int().min(1).max(12) // 1=Muḥarram ... 12=Dhu al-Hijjah
+});
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MIN_DIMENSIONS = { width: 200, height: 200 };
@@ -210,4 +216,85 @@ export async function getCashflowReport(year: number, month: number) {
   });
 
   return report;
+}
+
+/**
+ * Menghasilkan Date UTC yang mewakili "YYYY-MM-DD 00:00 WIB"
+ * Catatan: app Anda sebelumnya menggeser -7 jam (WIB). Kita pertahankan.
+ */
+function toUtcFromWibMidnight(gYear: number, gMonth0: number, gDay: number) {
+  const utc = new Date(Date.UTC(gYear, gMonth0, gDay, 0, 0, 0));
+  // 00:00 WIB (UTC+7) → geser -7 jam di UTC
+  utc.setUTCHours(utc.getUTCHours() - 7);
+  return utc;
+}
+
+/** Awal bulan Hijriyah (inklusif) & awal bulan berikutnya (eksklusif) dalam Gregorian-UTC yang mewakili 00:00 WIB */
+function getHijriMonthRangeWIB(hijriYear: number, hijriMonth: number) {
+  // Bangun dari string Hijriyah → paling minim bug
+  const startHijri = moment(`${hijriYear}-${hijriMonth}-01`, 'iYYYY-iM-iD');
+  if (!startHijri.isValid()) {
+    throw new Error(
+      'Invalid Hijri date. Periksa input atau import moment-hijri.'
+    );
+  }
+  const nextHijri = startHijri.clone().add(1, 'iMonth');
+
+  // Ambil komponen Gregorian numerik
+  const gy1 = startHijri.year(); // Gregorian year
+  const gm1 = startHijri.month(); // 0..11
+  const gd1 = startHijri.date(); // 1..31
+
+  const gy2 = nextHijri.year();
+  const gm2 = nextHijri.month();
+  const gd2 = nextHijri.date();
+
+  // Opsional: console untuk verifikasi
+  // console.log({ gy1, gm1, gd1, gy2, gm2, gd2,
+  //   iStart: startHijri.format('iYYYY-iM-iD'),
+  //   gStart: startHijri.format('YYYY-M-D')
+  // });
+
+  const startDate = toUtcFromWibMidnight(gy1, gm1, gd1);
+  const endDate = toUtcFromWibMidnight(gy2, gm2, gd2);
+  return { startDate, endDate };
+}
+
+type HijriReportInput = {
+  hijriYear: number;
+  hijriMonth: number; // 1..12
+};
+
+export async function getCashflowReportByHijri(input: unknown) {
+  const { hijriYear, hijriMonth } = getHijriMonthlyReportSchema.parse(input);
+
+  // === Pilih salah satu helper (A/B) ===
+  const { startDate, endDate } = getHijriMonthRangeWIB(hijriYear, hijriMonth);
+  //   const { startDate, endDate } = getHijriMonthRangeWIB_Intl(hijriYear, hijriMonth);
+  console.log({ startDate, endDate });
+
+  const records = await prisma.cashflow.findMany({
+    where: { date: { gte: startDate, lt: endDate } },
+    include: { income: true, fuelUsage: true },
+    orderBy: { date: 'asc' }
+  });
+
+  let runningBalance = 0;
+
+  return records.map((item) => {
+    const credit = item.type === 'INCOME' ? item.amount : 0;
+    const debit = item.type === 'EXPENSE' ? item.amount : 0;
+    runningBalance += credit - debit;
+
+    return {
+      id: item.id,
+      date: item.date, // tersimpan UTC; format di UI sesuai kebutuhan
+      description: item.description ?? null,
+      notes: item.income?.notes ?? item.fuelUsage?.notes ?? null,
+      credit: credit || null,
+      debit: debit || null,
+      runningBalance,
+      receiptFile: item.type === 'EXPENSE' ? item.fuelUsage?.receiptFile : null
+    };
+  });
 }

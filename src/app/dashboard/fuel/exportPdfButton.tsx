@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { id } from 'date-fns/locale';
 import { ReportItem } from './CashflowPage';
+import moment from 'moment-hijri';
 
 pdfMake.vfs = pdfFonts.vfs;
 
@@ -33,9 +34,10 @@ const ExportPdfButton = ({ data }: ExportPdfButtonProps) => {
   const generatePdf = async () => {
     setLoading(true);
     const firstUtc = new Date(data[0].date);
-    const monthYear = formatInTimeZone(firstUtc, 'Asia/Jakarta', 'LLLL yyyy', {
-      locale: id
-    });
+    // const monthYear = formatInTimeZone(firstUtc, 'Asia/Jakarta', 'LLLL yyyy', {
+    //   locale: id
+    // });
+    const monthYear = moment(firstUtc).format('iMMMM iYYYY');
     const fileName = `laporan-bbm-Akasia-${monthYear.toLowerCase().replace(' ', '-')}.pdf`;
 
     const processedData = await Promise.all(
@@ -65,7 +67,7 @@ const ExportPdfButton = ({ data }: ExportPdfButtonProps) => {
         { text: 'Saldo', bold: true }
       ],
       ...processedData.map((d) => [
-        format(new Date(d.date), 'dd-MM-yyyy'),
+        moment(d.date).format('iDD-iMM-iYYYY'),
         {
           stack: [
             d.description,

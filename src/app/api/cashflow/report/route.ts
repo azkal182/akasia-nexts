@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getCashflowReport, receiveIncome } from '@/actions/fuel'; // Pastikan fungsi ini sudah dibuat di lib/actions
+import {
+  getCashflowReport,
+  getCashflowReportByHijri,
+  receiveIncome
+} from '@/actions/fuel'; // Pastikan fungsi ini sudah dibuat di lib/actions
 import { auth } from '@/lib/auth';
 
 export async function GET(request: Request) {
@@ -26,10 +30,18 @@ export async function GET(request: Request) {
     }
 
     // Ambil data laporan dari fungsi lib/actions
-    const report = await getCashflowReport(year, month);
+    // const report = await getCashflowReport(year, month);
+    console.log({ year, month });
+
+    const report = await getCashflowReportByHijri({
+      hijriYear: year,
+      hijriMonth: month
+    });
 
     return NextResponse.json(report);
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { error: (error as Error).message || 'Internal Server Error' },
       { status: 500 }
