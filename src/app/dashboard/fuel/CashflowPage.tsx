@@ -118,6 +118,18 @@ export type ReportItem = {
   receiptFile: string | null;
 };
 
+function getSaldoBulanLalu(recordPertama: any): number {
+  // Pastikan nilai default adalah 0 jika properti tidak ada (null/undefined)
+  const runningBalance = recordPertama.runningBalance || 0;
+  const credit = recordPertama.credit || 0;
+  const debit = recordPertama.debit || 0;
+
+  // Membalikkan rumus:
+  // Saldo Bulan Lalu = Saldo Saat Ini - Pemasukan + Pengeluaran
+  const saldoBulanLalu = runningBalance - credit + debit;
+
+  return saldoBulanLalu;
+}
 export default function CashflowPage({
   cars,
   role
@@ -321,7 +333,11 @@ export default function CashflowPage({
 
   return (
     <div className='flex flex-1 flex-col space-y-4'>
-      <h1 className='text-2xl font-bold mb-6'>Laporan Bulanan Cashflow</h1>
+      <h1 className='text-2xl font-bold'>Laporan Bulanan Cashflow</h1>
+      <h2 className='text-lg font-bold mb-6'>
+        Kas Bulan Lalu: Rp.{' '}
+        {report.length > 0 ? getSaldoBulanLalu(report[0]) : '0'}
+      </h2>
 
       <Card className={'max-w-[calc(100vw-2rem)] md:max-w-full'}>
         <CardContent className={'pt-6'}>
