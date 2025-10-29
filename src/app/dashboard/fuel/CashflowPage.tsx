@@ -118,6 +118,7 @@ export type ReportItem = {
   receiptFile: string | null;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSaldoBulanLalu(recordPertama: any): number {
   // Pastikan nilai default adalah 0 jika properti tidak ada (null/undefined)
   const runningBalance = recordPertama.runningBalance || 0;
