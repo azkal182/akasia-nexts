@@ -227,7 +227,7 @@ export default function CashflowPage({
 
         // Refresh laporan
         const reportRes = await fetch(
-          `/api/cashflow/report?year=${year}&month=${month}`
+          `/api/cashflow/report?year=${hijriYear}&month=${hijriMonth}`
         ).then((r) => r.json());
 
         setReport(reportRes);
