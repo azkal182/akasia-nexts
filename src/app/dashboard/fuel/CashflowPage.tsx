@@ -281,7 +281,7 @@ export default function CashflowPage({
         setOpenFuel(false);
 
         const reportRes = await fetch(
-          `/api/cashflow/report?year=${year}&month=${month}`
+          `/api/cashflow/report?year=${hijriYear}&month=${hijriMonth}`
         ).then((r) => r.json());
 
         setReport(reportRes);
